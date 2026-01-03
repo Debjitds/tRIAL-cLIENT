@@ -1,6 +1,6 @@
 project_id = "avsuyudchzyoyakxotfm"
 
-[functions.generate-project]
+[functions.N8N-processor]
 verify_jwt = true
 
 [functions.award-xp]

@@ -29,7 +29,7 @@ export const ProjectDetailModal = ({ isOpen, onClose, retryData }: ProjectDetail
   const { quotaData, getQuotaStatus, getResetDate } = useQuotaManagement();
   const [generatingLevel, setGeneratingLevel] = useState<LevelType | null>(null);
   const [quotaExceededLevel, setQuotaExceededLevel] = useState<LevelType | null>(null);
-  
+
   // Get retry data from location state or props
   const locationState = location.state as { level?: string; projectType?: string; industry?: string } | null;
   const effectiveRetryData = retryData || locationState;
@@ -40,19 +40,19 @@ export const ProjectDetailModal = ({ isOpen, onClose, retryData }: ProjectDetail
       const level = effectiveRetryData.level as LevelType;
       const projectType = effectiveRetryData.projectType;
       const industry = effectiveRetryData.industry;
-      
+
       // Small delay to ensure modal is fully rendered
       const timer = setTimeout(() => {
         handleGenerate(level, projectType, industry);
       }, 500);
-      
+
       return () => clearTimeout(timer);
     }
   }, [isOpen, effectiveRetryData]);
 
   const handleGenerate = async (level: LevelType, projectType: string, industry: string) => {
     const status = getQuotaStatus(level);
-    
+
     // Check if user has sufficient credits
     if (!status.available) {
       toast({
@@ -65,10 +65,10 @@ export const ProjectDetailModal = ({ isOpen, onClose, retryData }: ProjectDetail
     }
 
     setGeneratingLevel(level);
-    
+
     try {
       // Quota consumption is handled server-side by the Edge Function
-      const { data, error } = await supabase.functions.invoke('generate-project', {
+      const { data, error } = await supabase.functions.invoke('N8N-processor', {
         body: { level, projectType, industry, userId: user?.id }
       });
 
@@ -76,10 +76,10 @@ export const ProjectDetailModal = ({ isOpen, onClose, retryData }: ProjectDetail
       if (error) {
         console.error('Generation error:', error);
         onClose();
-        navigate('/500', { 
-          state: { 
-            retryData: { level, projectType, industry } 
-          } 
+        navigate('/500', {
+          state: {
+            retryData: { level, projectType, industry }
+          }
         });
         return;
       }
@@ -89,17 +89,17 @@ export const ProjectDetailModal = ({ isOpen, onClose, retryData }: ProjectDetail
         // Server errors (500-level) - redirect to 500 page
         if (data?.status >= 500) {
           onClose();
-          navigate('/500', { 
-            state: { 
-              retryData: { level, projectType, industry } 
-            } 
+          navigate('/500', {
+            state: {
+              retryData: { level, projectType, industry }
+            }
           });
           return;
         }
         // Client errors (4xx) - show toast
         throw new Error(data?.message || 'Generation failed');
       }
-      
+
       toast({
         title: "Generating Your Brief",
         description: "Please wait while we create your personalized project brief...",
@@ -110,25 +110,25 @@ export const ProjectDetailModal = ({ isOpen, onClose, retryData }: ProjectDetail
       onClose();
     } catch (error: any) {
       console.error('Project generation catch error:', error);
-      
+
       // Check for network or server errors
-      const isServerError = error?.message?.includes('500') || 
-                           error?.message?.includes('server') ||
-                           error?.message?.toLowerCase().includes('network') ||
-                           error?.message?.toLowerCase().includes('fetch') ||
-                           error?.message?.toLowerCase().includes('failed to fetch') ||
-                           error?.status >= 500;
-      
+      const isServerError = error?.message?.includes('500') ||
+        error?.message?.includes('server') ||
+        error?.message?.toLowerCase().includes('network') ||
+        error?.message?.toLowerCase().includes('fetch') ||
+        error?.message?.toLowerCase().includes('failed to fetch') ||
+        error?.status >= 500;
+
       if (isServerError) {
         onClose();
-        navigate('/500', { 
-          state: { 
-            retryData: { level, projectType, industry } 
-          } 
+        navigate('/500', {
+          state: {
+            retryData: { level, projectType, industry }
+          }
         });
         return;
       }
-      
+
       toast({
         title: "Generation Failed",
         description: error instanceof Error ? error.message : "Please try again later.",
