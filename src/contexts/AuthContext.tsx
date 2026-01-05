@@ -89,6 +89,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Helper to check maintenance mode before allowing user access
+  const checkMaintenanceAndSignOut = async (userId: string): Promise<boolean> => {
+    try {
+      // SECURITY: Use SECURITY DEFINER RPC (system_settings has no SELECT policy by design)
+      const { data: maintenanceEnabled, error: maintenanceError } = await supabase.rpc('is_maintenance_mode');
+
+      if (maintenanceError) {
+        if (import.meta.env.DEV) {
+          console.error('Error checking maintenance mode:', maintenanceError);
+        }
+        return false;
+      }
+
+      if (maintenanceEnabled === true) {
+        // Check if user is admin
+        const { data: isAdmin } = await supabase.rpc('has_role', {
+          _user_id: userId,
+          _role: 'admin'
+        });
+
+        // If not admin during maintenance, sign them out immediately
+        if (!isAdmin) {
+          if (import.meta.env.DEV) {
+            console.warn('Maintenance mode active - signing out non-admin user');
+          }
+          await supabase.auth.signOut();
+          return true; // Signed out
+        }
+      }
+      return false; // Not signed out
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('Error checking maintenance mode:', error);
+      }
+      return false;
+    }
+  };
+
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -97,14 +135,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Process stored referral code after successful sign-up via OAuth
-        if (event === 'SIGNED_IN' && session?.user) {
-          // Use setTimeout to avoid Supabase auth deadlock
-          setTimeout(() => {
-            processStoredReferralCode(session.user.id);
-            // Track login to capture IP address
-            if (session.access_token) {
-              trackLogin(session.access_token);
+        if (session?.user) {
+          // Defer Supabase calls to avoid auth deadlocks
+          setTimeout(async () => {
+            // CRITICAL: Enforce maintenance mode for all active sessions
+            const wasSignedOut = await checkMaintenanceAndSignOut(session.user.id);
+            if (wasSignedOut) return;
+
+            // Process stored referral code after successful sign-up via OAuth
+            if (event === 'SIGNED_IN') {
+              processStoredReferralCode(session.user.id);
+
+              // Track login to capture IP address
+              if (session.access_token) {
+                trackLogin(session.access_token);
+              }
             }
           }, 0);
         }
@@ -116,6 +161,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // CRITICAL: Enforce maintenance mode for already-logged-in users
+      if (session?.user) {
+        setTimeout(() => {
+          checkMaintenanceAndSignOut(session.user.id);
+        }, 0);
+      }
     });
 
     return () => subscription.unsubscribe();
