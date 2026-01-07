@@ -65,7 +65,7 @@ When ready to connect real backend APIs:
 
 1. **Replace mock API calls in:**
    - `src/hooks/useQuotaManagement.ts` - Replace localStorage mock with actual `GET /api/me` endpoint
-   - `src/components/modals/ProjectDetailModal.tsx` - Update `POST /api/generate-project` endpoint
+   - `src/components/modals/ProjectDetailModal.tsx` - Update `POST /api/N8N-processor` endpoint
 
 2. **API Contract:**
 
@@ -83,7 +83,7 @@ When ready to connect real backend APIs:
   };
 }
 
-// POST /api/generate-project
+// POST /api/N8N-processor
 Request: {
   userId: string;
   level: 'beginner' | 'intermediate' | 'veteran';

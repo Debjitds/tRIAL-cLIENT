@@ -77,7 +77,7 @@ if (error || !user) {
 ```typescript
 // All requests include the session token
 const { data: { session } } = await supabase.auth.getSession();
-const response = await supabase.functions.invoke('generate-project', {
+const response = await supabase.functions.invoke('N8N-processor', {
   body: { level, projectType, industry },
   // Token is automatically included by Supabase client
 });
@@ -161,7 +161,7 @@ Navigate to **Security → WAF → Rate limiting rules**
 
 **Rule: AI Generation Endpoint**
 ```
-Expression: (http.request.uri.path contains "/functions/v1/generate-project")
+Expression: (http.request.uri.path contains "/functions/v1/N8N-processor")
 Rate: 10 requests per minute
 Per: IP address
 Action: Block for 1 minute
