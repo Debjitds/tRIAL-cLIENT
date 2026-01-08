@@ -4,6 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 // CORS configuration - restrict to known origins
 const allowedOrigins = [
   'https://avsuyudchzyoyakxotfm.lovable.app',
+  'https://trial-clients.vercel.app',
   /^https:\/\/.*\.lovable\.app$/,
   /^https:\/\/.*\.lovable\.dev$/,
   'http://localhost:5173',
@@ -28,7 +29,7 @@ function getCorsHeaders(req: Request): Record<string, string> {
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
-  
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -40,17 +41,17 @@ serve(async (req) => {
     const xRealIp = req.headers.get('x-real-ip');
     const xForwardedFor = req.headers.get('x-forwarded-for');
     const remoteAddr = req.headers.get('remote-addr');
-    
+
     // Use the first available IP
     let ipAddress = cfConnectingIp || xRealIp || remoteAddr || 'Unknown';
-    
+
     // x-forwarded-for can contain multiple IPs, take the first one
     if (!ipAddress || ipAddress === 'Unknown') {
       if (xForwardedFor) {
         ipAddress = xForwardedFor.split(',')[0].trim();
       }
     }
-    
+
     console.log('Track login - IP detection:', { cfConnectingIp, xRealIp, xForwardedFor, remoteAddr, final: ipAddress });
 
     // Get authorization header
@@ -72,7 +73,7 @@ serve(async (req) => {
     // Verify JWT token and get user
     const jwt = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(jwt);
-    
+
     if (authError || !user) {
       console.error('Invalid token:', authError?.message);
       return new Response(

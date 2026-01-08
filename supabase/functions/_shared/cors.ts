@@ -4,6 +4,7 @@
 const allowedOrigins = [
   // Production domains (update with your actual domain)
   'https://avsuyudchzyoyakxotfm.lovable.app',
+  'https://trial-clients.vercel.app',
   // Lovable preview domains
   /^https:\/\/.*\.lovable\.app$/,
   /^https:\/\/.*\.lovable\.dev$/,
@@ -16,7 +17,7 @@ const allowedOrigins = [
 
 export function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get('origin') || '';
-  
+
   // Check if origin matches any allowed origin
   const isAllowed = allowedOrigins.some(allowed => {
     if (typeof allowed === 'string') {

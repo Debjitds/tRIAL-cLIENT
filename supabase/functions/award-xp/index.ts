@@ -4,6 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 // CORS configuration - restrict to known origins
 const allowedOrigins = [
   'https://avsuyudchzyoyakxotfm.lovable.app',
+  'https://trial-clients.vercel.app',
   /^https:\/\/.*\.lovable\.app$/,
   /^https:\/\/.*\.lovable\.dev$/,
   'http://localhost:5173',
@@ -43,7 +44,7 @@ const ALLOWED_BADGE_TYPES = ['first_project', 'level_5', 'level_10', 'xp_5000', 
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
-  
+
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -64,12 +65,12 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    
+
     // Client for user verification
     const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } }
     });
-    
+
     // Service client for database operations
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -142,7 +143,7 @@ serve(async (req) => {
         .insert({ user_id: user.id, total_xp: 0, level: 1 })
         .select('total_xp, level')
         .single();
-      
+
       if (insertError) {
         console.error('Error creating XP record:', insertError);
         return new Response(
@@ -196,7 +197,7 @@ serve(async (req) => {
         .eq('user_id', user.id)
         .eq('badge_type', 'first_project')
         .maybeSingle();
-      
+
       if (!existingBadge) {
         badgesToAward.push('first_project');
       }
@@ -210,7 +211,7 @@ serve(async (req) => {
         .eq('user_id', user.id)
         .eq('badge_type', 'referral_success')
         .maybeSingle();
-      
+
       if (!existingBadge) {
         badgesToAward.push('referral_success');
       }
@@ -225,7 +226,7 @@ serve(async (req) => {
         .eq('user_id', user.id)
         .eq('badge_type', badgeType)
         .maybeSingle();
-      
+
       if (!existingBadge) {
         badgesToAward.push(badgeType);
       }
@@ -239,7 +240,7 @@ serve(async (req) => {
         .eq('user_id', user.id)
         .eq('badge_type', 'xp_5000')
         .maybeSingle();
-      
+
       if (!existingBadge) {
         badgesToAward.push('xp_5000');
       }

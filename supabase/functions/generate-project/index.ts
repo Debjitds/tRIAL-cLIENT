@@ -5,6 +5,7 @@ import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 // CORS configuration - restrict to known origins
 const allowedOrigins = [
   'https://avsuyudchzyoyakxotfm.lovable.app',
+  'https://trial-clients.vercel.app',
   /^https:\/\/.*\.lovable\.app$/,
   /^https:\/\/.*\.lovable\.dev$/,
   'http://localhost:5173',
@@ -57,21 +58,21 @@ function sanitizeInput(input: string): string {
 // ============================================
 function errorResponse(status: number, message: string, corsHeaders: Record<string, string>): Response {
   return new Response(
-    JSON.stringify({ 
-      ok: false, 
-      status, 
-      message 
+    JSON.stringify({
+      ok: false,
+      status,
+      message
     }),
-    { 
+    {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status 
+      status
     }
   );
 }
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
-  
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -98,7 +99,7 @@ serve(async (req) => {
     // ============================================
     const jwt = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(jwt);
-    
+
     if (authError || !user) {
       console.error('Security: Invalid token', authError?.message);
       return errorResponse(401, 'Unauthorized: Invalid token', corsHeaders);
@@ -181,7 +182,7 @@ serve(async (req) => {
       console.error('Security: Validation failed', validationResult.error.errors);
       return errorResponse(400, `Invalid input: ${validationResult.error.errors.map(e => e.message).join(', ')}`, corsHeaders);
     }
-    
+
     const { level, projectType, industry } = validationResult.data;
     console.log('Validated input:', { level, projectType, industry, userId });
 
@@ -238,13 +239,13 @@ serve(async (req) => {
     const n8nWebhookBaseUrl = Deno.env.get('N8N_WEBHOOK_URL');
     if (!n8nWebhookBaseUrl) {
       console.error('N8N_WEBHOOK_URL environment variable is not set');
-      
+
       // Update project status to failed - NO credits lost
       await supabaseClient
         .from('projects')
         .update({ status: 'failed' })
         .eq('id', project.id);
-      
+
       return errorResponse(500, 'Webhook configuration error', corsHeaders);
     }
 
@@ -254,9 +255,9 @@ serve(async (req) => {
     n8nWebhookUrl.searchParams.append('industry', industry);
     n8nWebhookUrl.searchParams.append('projectId', project.id);
     n8nWebhookUrl.searchParams.append('timestamp', new Date().toISOString());
-    
+
     console.log('Calling n8n webhook...');
-    
+
     let n8nResponse;
     try {
       n8nResponse = await fetch(n8nWebhookUrl.toString(), {
@@ -267,26 +268,26 @@ serve(async (req) => {
       });
     } catch (fetchError) {
       console.error('n8n webhook fetch failed:', fetchError);
-      
+
       // Update project status to failed - NO credits lost
       await supabaseClient
         .from('projects')
         .update({ status: 'failed' })
         .eq('id', project.id);
-      
+
       return errorResponse(500, 'Failed to connect to brief generation service', corsHeaders);
     }
 
     if (!n8nResponse.ok) {
       const errorText = await n8nResponse.text();
       console.error('n8n webhook failed:', n8nResponse.status, errorText);
-      
+
       // Update project status to failed - NO credits lost
       await supabaseClient
         .from('projects')
         .update({ status: 'failed' })
         .eq('id', project.id);
-      
+
       return errorResponse(500, 'Failed to generate brief', corsHeaders);
     }
 
@@ -296,13 +297,13 @@ serve(async (req) => {
       briefData = await n8nResponse.json();
     } catch (parseError) {
       console.error('Failed to parse n8n response:', parseError);
-      
+
       // Update project status to failed - NO credits lost
       await supabaseClient
         .from('projects')
         .update({ status: 'failed' })
         .eq('id', project.id);
-      
+
       return errorResponse(500, 'Invalid response from brief generation service', corsHeaders);
     }
 
@@ -314,13 +315,13 @@ serve(async (req) => {
     // Validate that we have actual brief content
     if (!briefDataObject || Object.keys(briefDataObject).length === 0) {
       console.error('Empty brief data received');
-      
+
       // Update project status to failed - NO credits lost
       await supabaseClient
         .from('projects')
         .update({ status: 'failed' })
         .eq('id', project.id);
-      
+
       return errorResponse(500, 'Empty brief received from generation service', corsHeaders);
     }
 
@@ -335,13 +336,13 @@ serve(async (req) => {
 
     if (updateError) {
       console.error('Failed to update project with brief:', updateError);
-      
+
       // Mark as failed - NO credits lost
       await supabaseClient
         .from('projects')
         .update({ status: 'failed' })
         .eq('id', project.id);
-      
+
       return errorResponse(500, 'Failed to save brief data', corsHeaders);
     }
 
@@ -387,15 +388,15 @@ serve(async (req) => {
           veteran: 200
         };
         const xpGain = XP_VALUES[level] || 50;
-        
+
         const currentXP = xpData?.total_xp || 0;
         const currentLevel = xpData?.level || 1;
         const newTotalXP = currentXP + xpGain;
-        
+
         // Calculate new level (1000 XP per level)
         const newLevel = Math.floor(newTotalXP / 1000) + 1;
         const leveledUp = newLevel > currentLevel;
-        
+
         if (xpData) {
           // Update existing XP
           await supabaseClient
@@ -408,29 +409,29 @@ serve(async (req) => {
             .from('user_xp')
             .insert({ user_id: userId, total_xp: xpGain, level: newLevel });
         }
-        
+
         // Log XP event
         await supabaseClient
           .from('xp_events')
           .insert({ user_id: userId, event_type: 'project_created', xp_gained: xpGain });
-        
+
         // Check for first_project badge
         const { count: projectCount } = await supabaseClient
           .from('projects')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', userId);
-        
+
         if (projectCount === 1) {
           // Award first_project badge
           const { error: badgeError } = await supabaseClient
             .from('user_badges')
             .insert({ user_id: userId, badge_type: 'first_project' });
-          
+
           if (!badgeError) {
             console.log('First project badge awarded');
           }
         }
-        
+
         console.log(`XP awarded: ${xpGain}, New total: ${newTotalXP}, Level: ${newLevel}, Leveled up: ${leveledUp}`);
       }
     } catch (xpError) {
@@ -442,16 +443,16 @@ serve(async (req) => {
     // Return success response
     // ============================================
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         ok: true,
         status: 200,
         id: project.id,
         message: 'Project created and brief generated successfully',
         credits_used: creditsUsed
       }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
+        status: 200
       }
     );
   } catch (error) {
