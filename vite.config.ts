@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => ({
       includeAssets: ["favicon.png", "icons/icon-192x192.png", "icons/icon-512x512.png"],
       manifest: {
         name: "tRIAL - cLIENTS",
-        short_name: "tRIAL",
+        short_name: "tRIAL-cLIENTS",
         description: "Generate realistic client briefs and practice projects with AI",
         theme_color: "#6366f1",
         background_color: "#0a0a0b",
