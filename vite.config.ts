@@ -74,7 +74,7 @@ export default defineConfig(({ mode }) => ({
             src: "/icons/144 X 144.png",
             sizes: "144x144",
             type: "image/png",
-            purpose: "maskable"
+            purpose: "any"
           },
           {
             src: "/icons/152 X 152.png",
