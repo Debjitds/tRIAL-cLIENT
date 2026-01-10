@@ -117,32 +117,39 @@ export default defineConfig(({ mode }) => ({
           {
             src: "/screenshots/desktoplanding.png",
             sizes: "1280x720",
-            type: "image/png"
+            type: "image/png",
+            form_factor: "wide",
+
           },
           {
             src: "/screenshots/mobilelanding.png",
             sizes: "1080x2340",
-            type: "image/png"
+            type: "image/png",
+            form_factor: "narrow",
           },
           {
             src: "/screenshots/mobilelandingg.png",
             sizes: "1080x2340",
-            type: "image/png"
+            type: "image/png",
+            form_factor: "narrow",
           },
           {
             src: "/screenshots/mobiledashboard.png",
             sizes: "1080x2340",
-            type: "image/png"
+            type: "image/png",
+            form_factor: "narrow",
           },
           {
             src: "/screenshots/mobiledashboardd.png",
             sizes: "1080x2340",
-            type: "image/png"
+            type: "image/png",
+            form_factor: "narrow",
           },
           {
             src: "/screenshots/mobilehelp.png",
             sizes: "1080x2340",
-            type: "image/png"
+            type: "image/png",
+            form_factor: "narrow",
           },
         ],
       },
