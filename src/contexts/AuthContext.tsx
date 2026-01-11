@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const result = data as { ok?: boolean; referred_credits?: number; message?: string } | null;
-      
+
       if (result?.ok) {
         toast({
           title: '🎉 Welcome Bonus!',
@@ -174,8 +174,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string) => {
-    const redirectUrl = `${window.location.origin}/dashboard`;
-    
+    const redirectUrl = `${import.meta.env.VITE_PUBLIC_SITE_URL}/dashboard`;
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -183,7 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         emailRedirectTo: redirectUrl
       }
     });
-    
+
     if (error) {
       toast({
         title: "Sign Up Error",
@@ -196,7 +196,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: "Account created successfully. Check your email to confirm.",
       });
     }
-    
+
     return { error };
   };
 
@@ -205,7 +205,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
     });
-    
+
     if (error) {
       toast({
         title: "Sign In Error",
@@ -218,13 +218,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: "Successfully signed in.",
       });
     }
-    
+
     return { error };
   };
 
   const signInWithGoogle = async (displayName?: string) => {
-    const redirectUrl = `${window.location.origin}/dashboard`;
-    
+    const redirectUrl = `${import.meta.env.VITE_PUBLIC_SITE_URL}/dashboard`;
+
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -235,7 +235,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       },
     });
-    
+
     if (error) {
       toast({
         title: "Google Sign In Error",
@@ -243,7 +243,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         variant: "destructive",
       });
     }
-    
+
     return { error };
   };
 
