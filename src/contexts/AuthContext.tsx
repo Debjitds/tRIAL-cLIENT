@@ -174,7 +174,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string) => {
-    const redirectUrl = `${import.meta.env.VITE_PUBLIC_SITE_URL}/dashboard`;
+    const redirectUrl = `${window.location.origin}/dashboard`;
 
     const { error } = await supabase.auth.signUp({
       email,
@@ -223,7 +223,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithGoogle = async (displayName?: string) => {
-    const redirectUrl = `${import.meta.env.VITE_PUBLIC_SITE_URL}/dashboard`;
+    const redirectUrl = `${window.location.origin}/dashboard`;
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
