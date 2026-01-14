@@ -17,6 +17,8 @@ import {
   User,
   Moon,
   Sun,
+  Monitor,
+  Check,
   Share2,
   CreditCard,
   Crown,
@@ -38,19 +40,21 @@ const UserMenu = ({ onReferClick }: UserMenuProps) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('dark');
   const [totalCredits, setTotalCredits] = useState<number>(0);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string>('');
 
   useEffect(() => {
-    // Initialize dark mode as default
-    const isDark = document.documentElement.classList.contains('dark');
-    if (!isDark && !localStorage.getItem('theme')) {
+    // Initialize theme from localStorage
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+      applyTheme(savedTheme);
+    } else {
+      // Default to dark mode
       document.documentElement.classList.add('dark');
       setTheme('dark');
-    } else {
-      setTheme(isDark ? 'dark' : 'light');
     }
 
     // Fetch profile and credits
@@ -155,17 +159,39 @@ const UserMenu = ({ onReferClick }: UserMenuProps) => {
 
   const initials = displayName.slice(0, 2).toUpperCase();
 
-  const handleThemeToggle = (newTheme: 'light' | 'dark') => {
+  const applyTheme = (newTheme: 'light' | 'dark' | 'system') => {
+    if (newTheme === 'system') {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.classList.toggle('dark', prefersDark);
+    } else {
+      document.documentElement.classList.toggle('dark', newTheme === 'dark');
+    }
+  };
+
+  const handleThemeToggle = (newTheme: 'light' | 'dark' | 'system') => {
     setTheme(newTheme);
-    document.documentElement.classList.toggle('dark', newTheme === 'dark');
+    applyTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     
+    const themeLabels = { light: 'Light', dark: 'Dark', system: 'System' };
     toast({
       title: 'Appearance Updated',
-      description: `Switched to ${newTheme} mode`,
+      description: `Switched to ${themeLabels[newTheme]} mode`,
       duration: 2000,
     });
   };
+
+  // Listen for OS theme changes when in system mode
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => {
+      if (theme === 'system') {
+        document.documentElement.classList.toggle('dark', mediaQuery.matches);
+      }
+    };
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [theme]);
 
   const handleHistory = () => {
     navigate('/history');
@@ -216,7 +242,7 @@ const UserMenu = ({ onReferClick }: UserMenuProps) => {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-56 bg-background/95 backdrop-blur-lg border-border/50"
+        className="w-56 bg-popover border border-border shadow-lg"
         role="menu"
       >
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
@@ -225,27 +251,45 @@ const UserMenu = ({ onReferClick }: UserMenuProps) => {
         {/* Appearance submenu */}
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="cursor-pointer">
-            {theme === 'dark' ? (
+            {theme === 'system' ? (
+              <Monitor className="mr-2 h-4 w-4" />
+            ) : theme === 'dark' ? (
               <Moon className="mr-2 h-4 w-4" />
             ) : (
               <Sun className="mr-2 h-4 w-4" />
             )}
             <span>Appearance</span>
           </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="bg-background/95 backdrop-blur-lg border-border/50">
+          <DropdownMenuSubContent className="bg-popover border border-border shadow-lg">
             <DropdownMenuItem
               onClick={() => handleThemeToggle('light')}
-              className="cursor-pointer"
+              className="cursor-pointer flex items-center justify-between"
             >
-              <Sun className="mr-2 h-4 w-4" />
-              <span>Light</span>
+              <div className="flex items-center">
+                <Sun className="mr-2 h-4 w-4" />
+                <span>Light</span>
+              </div>
+              {theme === 'light' && <Check className="h-4 w-4 text-primary" />}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => handleThemeToggle('dark')}
-              className="cursor-pointer"
+              className="cursor-pointer flex items-center justify-between"
             >
-              <Moon className="mr-2 h-4 w-4" />
-              <span>Dark</span>
+              <div className="flex items-center">
+                <Moon className="mr-2 h-4 w-4" />
+                <span>Dark</span>
+              </div>
+              {theme === 'dark' && <Check className="h-4 w-4 text-primary" />}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => handleThemeToggle('system')}
+              className="cursor-pointer flex items-center justify-between"
+            >
+              <div className="flex items-center">
+                <Monitor className="mr-2 h-4 w-4" />
+                <span>System</span>
+              </div>
+              {theme === 'system' && <Check className="h-4 w-4 text-primary" />}
             </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
