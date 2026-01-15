@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import jsPDF from 'jspdf';
 
+
 interface BriefData {
   company_name: string;
   tagline: string;
@@ -46,7 +47,7 @@ export default function ProjectWorkspace() {
   useEffect(() => {
     const fetchProject = async () => {
       if (!id) return;
-      
+
       setLoading(true);
       try {
         const { data, error } = await supabase
@@ -88,7 +89,7 @@ export default function ProjectWorkspace() {
         (payload) => {
           console.log('Project updated via realtime:', payload);
           setProject(payload.new as any as ProjectBrief);
-          
+
           if (payload.new.status === 'completed') {
             toast({
               title: 'Brief Ready!',
@@ -114,11 +115,11 @@ export default function ProjectWorkspace() {
 
   const downloadBriefAsPDF = () => {
     if (!project || !project.brief_data) return;
-    
-    const data = Array.isArray(project.brief_data) 
-      ? project.brief_data[0] 
+
+    const data = Array.isArray(project.brief_data)
+      ? project.brief_data[0]
       : project.brief_data;
-    
+
     if (!data || typeof data !== 'object') return;
 
     const doc = new jsPDF();
@@ -131,7 +132,7 @@ export default function ProjectWorkspace() {
       doc.setFontSize(fontSize);
       doc.setFont('helvetica', isBold ? 'bold' : 'normal');
       const lines = doc.splitTextToSize(text || '', maxWidth);
-      
+
       for (const line of lines) {
         if (yPosition > 270) {
           doc.addPage();
@@ -148,7 +149,7 @@ export default function ProjectWorkspace() {
     addText(data.tagline || '', 12);
     addText(data.slogan || '', 10);
     yPosition += 5;
-    
+
     addText(`Location: ${data.location || 'N/A'}`, 10);
     addText(`Colors: ${(data.primary_color_palette || []).join(', ')}`, 10);
     addText(`Design Style: ${(data.design_style_keywords || []).join(', ')}`, 10);
@@ -173,7 +174,7 @@ export default function ProjectWorkspace() {
 
     const fileName = `${(data.company_name || 'project').replace(/\s+/g, '-').toLowerCase()}-brief.pdf`;
     doc.save(fileName);
-    
+
     toast({
       title: 'Downloaded!',
       description: 'Project brief saved as PDF',
@@ -182,12 +183,12 @@ export default function ProjectWorkspace() {
 
   const shareBrief = async () => {
     const shareUrl = window.location.href;
-    
+
     if (navigator.share) {
       try {
         await navigator.share({
-          title: project?.brief_data ? 
-            (Array.isArray(project.brief_data) ? project.brief_data[0]?.company_name : project.brief_data.company_name) 
+          title: project?.brief_data ?
+            (Array.isArray(project.brief_data) ? project.brief_data[0]?.company_name : project.brief_data.company_name)
             : 'Project Brief',
           text: 'Check out this project brief!',
           url: shareUrl,
@@ -259,8 +260,8 @@ export default function ProjectWorkspace() {
           >
             Please wait...
           </motion.div>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="mt-6"
             onClick={() => navigate('/dashboard')}
           >
@@ -272,8 +273,8 @@ export default function ProjectWorkspace() {
   }
 
   // Handle both array and object format from n8n
-  const briefData = Array.isArray(project.brief_data) 
-    ? project.brief_data[0] 
+  const briefData = Array.isArray(project.brief_data)
+    ? project.brief_data[0]
     : project.brief_data;
 
   // Safety check - ensure we have valid brief data
@@ -301,7 +302,7 @@ export default function ProjectWorkspace() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-7xl">
         {/* Header - stacks on mobile */}
         <div className="flex flex-col gap-4 mb-6 sm:mb-8">
@@ -358,7 +359,7 @@ export default function ProjectWorkspace() {
                   <p className="text-muted-foreground text-xs sm:text-sm">Location</p>
                   <p className="font-medium text-foreground break-words">{briefData.location}</p>
                 </div>
-                
+
                 {/* Grid for metadata on mobile */}
                 <div className="grid grid-cols-3 gap-3 sm:grid-cols-1 sm:gap-3">
                   <div>
@@ -374,13 +375,13 @@ export default function ProjectWorkspace() {
                     <p className="font-medium text-foreground capitalize text-xs sm:text-sm">{project.level}</p>
                   </div>
                 </div>
-                
+
                 <div>
                   <p className="text-muted-foreground mb-2 text-xs sm:text-sm">Color Palette</p>
                   <div className="flex gap-2 flex-wrap">
                     {briefData.primary_color_palette.map((color, idx) => (
                       <div key={idx} className="flex flex-col items-center gap-1">
-                        <div 
+                        <div
                           className="h-6 w-6 sm:h-8 sm:w-8 rounded-md border border-border shadow-sm"
                           style={{ backgroundColor: color }}
                         />

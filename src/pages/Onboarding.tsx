@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, CheckCircle, Sparkles, User, Target, Code } from "lucide-react";
 import { useState } from "react";
 
+
 const Onboarding = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
@@ -25,8 +26,8 @@ const Onboarding = () => {
   ];
 
   const handleSkillToggle = (skill: string) => {
-    setSelectedSkills(prev => 
-      prev.includes(skill) 
+    setSelectedSkills(prev =>
+      prev.includes(skill)
         ? prev.filter(s => s !== skill)
         : [...prev, skill]
     );
@@ -82,7 +83,7 @@ const Onboarding = () => {
 
               <div>
                 <Label htmlFor="experience">Experience Level</Label>
-                <select 
+                <select
                   className="w-full mt-2 p-3 border border-border rounded-lg bg-surface"
                   value={formData.experience}
                   onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
@@ -114,11 +115,10 @@ const Onboarding = () => {
                 <Badge
                   key={skill}
                   variant={selectedSkills.includes(skill) ? "default" : "outline"}
-                  className={`p-3 cursor-pointer transition-all hover-lift text-center ${
-                    selectedSkills.includes(skill) 
-                      ? 'bg-gradient-primary text-primary-foreground' 
-                      : 'hover:border-primary'
-                  }`}
+                  className={`p-3 cursor-pointer transition-all hover-lift text-center ${selectedSkills.includes(skill)
+                    ? 'bg-gradient-primary text-primary-foreground'
+                    : 'hover:border-primary'
+                    }`}
                   onClick={() => handleSkillToggle(skill)}
                 >
                   {skill}
@@ -174,21 +174,20 @@ const Onboarding = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
+    <div className="min-h-screen bg-transparent flex items-center justify-center p-4">
       <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      
+
       <div className="w-full max-w-2xl relative z-10">
         {/* Progress indicator */}
         <div className="flex items-center justify-center space-x-4 mb-8">
           {[1, 2, 3].map((step) => (
             <div key={step} className="flex items-center">
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                  step <= currentStep 
-                    ? 'bg-gradient-primary text-primary-foreground' 
-                    : 'bg-muted text-muted-foreground'
-                }`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${step <= currentStep
+                  ? 'bg-gradient-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground'
+                  }`}
               >
                 {step < currentStep ? (
                   <CheckCircle className="h-5 w-5" />
@@ -197,10 +196,9 @@ const Onboarding = () => {
                 )}
               </div>
               {step < 3 && (
-                <div 
-                  className={`w-16 h-1 mx-2 rounded-full ${
-                    step < currentStep ? 'bg-primary' : 'bg-muted'
-                  }`}
+                <div
+                  className={`w-16 h-1 mx-2 rounded-full ${step < currentStep ? 'bg-primary' : 'bg-muted'
+                    }`}
                 />
               )}
             </div>
@@ -214,7 +212,7 @@ const Onboarding = () => {
               Step {currentStep} of 3 — Let's set up your account
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent className="p-8">
             {renderStep()}
 

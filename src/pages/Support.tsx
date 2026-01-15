@@ -9,6 +9,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 
+
 const Support = () => {
   const faqs = [
     {
@@ -38,9 +39,9 @@ const Support = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <Navbar />
-      
+
       <main className="container mx-auto px-4 py-12 sm:py-20 max-w-4xl">
         <Link to="/">
           <Button variant="ghost" size="sm" className="mb-8 gap-2">
@@ -52,7 +53,7 @@ const Support = () => {
         <h1 className="text-4xl sm:text-5xl font-bold text-gradient mb-6">
           Support Center
         </h1>
-        
+
         <p className="text-lg text-muted-foreground mb-12 leading-relaxed">
           Find answers to common questions or get in touch with our team.
         </p>
@@ -66,7 +67,7 @@ const Support = () => {
               Detailed guides and tutorials
             </p>
           </Link>
-          
+
           <Link to="/contact" className="p-6 rounded-xl bg-card border border-border hover:border-primary/50 transition-colors">
             <MessageCircle className="h-8 w-8 text-accent mb-4" />
             <h3 className="font-semibold mb-2">Contact Us</h3>
@@ -74,7 +75,7 @@ const Support = () => {
               Get in touch directly
             </p>
           </Link>
-          
+
           <a href="mailto:support@trial-clients.com" className="p-6 rounded-xl bg-card border border-border hover:border-primary/50 transition-colors">
             <Mail className="h-8 w-8 text-primary mb-4" />
             <h3 className="font-semibold mb-2">Email Support</h3>
@@ -90,7 +91,7 @@ const Support = () => {
             <FileQuestion className="h-6 w-6 text-primary" />
             <h2 className="text-2xl font-semibold">Frequently Asked Questions</h2>
           </div>
-          
+
           <Accordion type="single" collapsible className="w-full">
             {faqs.map((faq, index) => (
               <AccordionItem key={index} value={`item-${index}`}>
@@ -111,7 +112,7 @@ const Support = () => {
             <HelpCircle className="h-6 w-6 text-accent" />
             <h2 className="text-2xl font-semibold">Still Need Help?</h2>
           </div>
-          
+
           <div className="p-6 rounded-xl bg-gradient-hero border border-border">
             <p className="text-muted-foreground mb-4">
               Can't find what you're looking for? Our support team is here to help.

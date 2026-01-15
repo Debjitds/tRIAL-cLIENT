@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
+
 const plans = [
   {
     name: 'Free',
@@ -59,7 +60,7 @@ export default function Pricing() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background py-6 sm:py-12 lg:py-20">
+    <div className="min-h-screen bg-transparent py-6 sm:py-12 lg:py-20">
       <div className="container mx-auto px-4">
         {/* Close/Back buttons */}
         <div className="flex items-center justify-between mb-6 sm:mb-8 max-w-6xl mx-auto">
@@ -82,7 +83,7 @@ export default function Pricing() {
             <X className="h-4 w-4" />
           </Button>
         </div>
-        
+
         <div className="text-center mb-8 sm:mb-12 lg:mb-16">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-3 sm:mb-4">
             Simple, Transparent Pricing
@@ -101,11 +102,10 @@ export default function Pricing() {
               transition={{ delay: index * 0.1 }}
               className="flex"
             >
-              <Card className={`glass-card flex flex-col w-full relative ${
-                plan.highlighted 
-                  ? 'border-primary shadow-glow ring-2 ring-primary/20' 
-                  : 'border-border/30'
-              }`}>
+              <Card className={`glass-card flex flex-col w-full relative ${plan.highlighted
+                ? 'border-primary shadow-glow ring-2 ring-primary/20'
+                : 'border-border/30'
+                }`}>
                 {plan.highlighted && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                     <Badge className="bg-gradient-primary text-primary-foreground px-3 py-1 text-xs font-semibold">
@@ -113,16 +113,14 @@ export default function Pricing() {
                     </Badge>
                   </div>
                 )}
-                
+
                 <CardHeader className="text-center pb-4 pt-6 sm:pt-8">
-                  <div className={`w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 rounded-xl flex items-center justify-center ${
-                    plan.highlighted ? 'bg-gradient-primary' : 'bg-muted'
-                  }`}>
-                    <plan.icon className={`h-6 w-6 sm:h-7 sm:w-7 ${
-                      plan.highlighted ? 'text-primary-foreground' : 'text-foreground'
-                    }`} />
+                  <div className={`w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 rounded-xl flex items-center justify-center ${plan.highlighted ? 'bg-gradient-primary' : 'bg-muted'
+                    }`}>
+                    <plan.icon className={`h-6 w-6 sm:h-7 sm:w-7 ${plan.highlighted ? 'text-primary-foreground' : 'text-foreground'
+                      }`} />
                   </div>
-                  
+
                   <CardTitle className="text-xl sm:text-2xl text-foreground">{plan.name}</CardTitle>
                   <CardDescription className="text-muted-foreground text-sm">{plan.description}</CardDescription>
                   <div className="mt-3 sm:mt-4">
@@ -130,10 +128,10 @@ export default function Pricing() {
                     <span className="text-muted-foreground text-sm">/month</span>
                   </div>
                 </CardHeader>
-                
+
                 <CardContent className="flex-1 flex flex-col">
                   {plan.isContact ? (
-                    <Button 
+                    <Button
                       className="w-full mb-4 sm:mb-6"
                       variant="outline"
                       asChild
@@ -144,18 +142,17 @@ export default function Pricing() {
                       </a>
                     </Button>
                   ) : (
-                    <Button 
-                      className={`w-full mb-4 sm:mb-6 ${
-                        plan.highlighted 
-                          ? 'bg-gradient-primary hover:opacity-90' 
-                          : ''
-                      }`}
+                    <Button
+                      className={`w-full mb-4 sm:mb-6 ${plan.highlighted
+                        ? 'bg-gradient-primary hover:opacity-90'
+                        : ''
+                        }`}
                       variant={plan.highlighted ? 'default' : 'outline'}
                     >
                       {plan.cta}
                     </Button>
                   )}
-                  
+
                   <ul className="space-y-2 sm:space-y-3 flex-1">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex items-start">

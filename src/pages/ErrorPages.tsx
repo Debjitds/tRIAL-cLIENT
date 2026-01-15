@@ -5,6 +5,7 @@ import { AlertTriangle, Home, Shield, Settings, RefreshCw } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { supabase } from '@/integrations/supabase/client';
 
+
 export const ForbiddenPage = () => {
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
@@ -34,7 +35,7 @@ export const ForbiddenPage = () => {
                   <span>Return Home</span>
                 </Link>
               </Button>
-              
+
               <Button variant="outline" size="lg" className="w-full" asChild>
                 <Link to="/login/user" className="flex items-center justify-center space-x-2">
                   <Shield className="h-4 w-4" />
@@ -65,7 +66,7 @@ interface ServerErrorPageProps {
 export const ServerErrorPage = ({ onRetry, retryData }: ServerErrorPageProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Get retry data from location state if not passed as props
   const stateData = location.state as { retryData?: ServerErrorPageProps['retryData'] } | null;
   const effectiveRetryData = retryData || stateData?.retryData;
@@ -75,10 +76,10 @@ export const ServerErrorPage = ({ onRetry, retryData }: ServerErrorPageProps) =>
       onRetry();
     } else if (effectiveRetryData) {
       // Navigate back to dashboard with retry intent
-      navigate('/dashboard', { 
-        state: { 
-          retryGeneration: true, 
-          ...effectiveRetryData 
+      navigate('/dashboard', {
+        state: {
+          retryGeneration: true,
+          ...effectiveRetryData
         },
         replace: true
       });
@@ -117,7 +118,7 @@ export const ServerErrorPage = ({ onRetry, retryData }: ServerErrorPageProps) =>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Try Again
               </Button>
-              
+
               <Button variant="outline" size="lg" className="w-full" asChild>
                 <Link to="/dashboard" className="flex items-center justify-center space-x-2">
                   <Home className="h-4 w-4" />
@@ -146,21 +147,21 @@ export const MaintenancePage = ({ message }: MaintenancePageProps) => {
   // Real-time subscription to detect when maintenance mode is turned OFF
   useEffect(() => {
     // Function to check current maintenance status
-      const checkMaintenanceStatus = async () => {
-        try {
-          const { data, error } = await supabase.rpc('is_maintenance_mode');
+    const checkMaintenanceStatus = async () => {
+      try {
+        const { data, error } = await supabase.rpc('is_maintenance_mode');
 
-          // If maintenance is OFF, redirect user back to home
-          if (!error && data !== true) {
-            navigate('/', { replace: true });
-          }
-        } catch (error) {
-          // On error, stay on maintenance page
-          if (import.meta.env.DEV) {
-            console.error('Error checking maintenance status:', error);
-          }
+        // If maintenance is OFF, redirect user back to home
+        if (!error && data !== true) {
+          navigate('/', { replace: true });
         }
-      };
+      } catch (error) {
+        // On error, stay on maintenance page
+        if (import.meta.env.DEV) {
+          console.error('Error checking maintenance status:', error);
+        }
+      }
+    };
 
     // Check immediately on mount
     checkMaintenanceStatus();
@@ -219,8 +220,8 @@ export const MaintenancePage = ({ message }: MaintenancePageProps) => {
 
             {/* Admin login link - subtle but accessible */}
             <div className="pt-4 border-t border-border/20">
-              <Link 
-                to="/login/admin" 
+              <Link
+                to="/login/admin"
                 className="block text-xs text-center text-muted-foreground hover:text-foreground-secondary transition-colors"
               >
                 Admin Access

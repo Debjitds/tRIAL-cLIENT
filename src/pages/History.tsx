@@ -20,6 +20,7 @@ import {
 import { FileText, Calendar, Download, Eye, X, Loader2, ArrowLeft, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
+
 interface BriefData {
   company_name: string;
   tagline: string;
@@ -66,7 +67,7 @@ const History = () => {
 
   const fetchProjects = async () => {
     if (!user) return;
-    
+
     try {
       const { data, error } = await supabase
         .from('projects')
@@ -94,7 +95,7 @@ const History = () => {
 
   const downloadBrief = (project: Project) => {
     if (!project.brief_data) return;
-    
+
     const briefData = project.brief_data;
     const content = `# ${briefData.company_name}\n\n${briefData.tagline}\n\n${briefData.slogan}\n\n` +
       `**Location:** ${briefData.location}\n\n` +
@@ -108,7 +109,7 @@ const History = () => {
       `## ORDER PAGE\n\n${briefData.order_page}\n\n` +
       `## AUDIENCE\n\n${briefData.audience}\n\n` +
       `## TIPS\n\n${briefData.tips}\n\n`;
-    
+
     const blob = new Blob([content], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -139,7 +140,7 @@ const History = () => {
 
   const handleDeleteSelected = async () => {
     if (selectedIds.size === 0) return;
-    
+
     setDeleting(true);
     try {
       const { error } = await supabase
@@ -169,14 +170,14 @@ const History = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background py-4 sm:py-8 lg:py-12">
+    <div className="min-h-screen bg-transparent py-4 sm:py-8 lg:py-12">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
           <div className="flex items-center gap-3">
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => navigate('/dashboard')}
               className="gap-1.5 text-xs sm:text-sm -ml-2"
             >
@@ -300,7 +301,7 @@ const History = () => {
                       {project.brief_data.primary_color_palette && (
                         <div className="flex gap-1">
                           {project.brief_data.primary_color_palette.slice(0, 4).map((color, idx) => (
-                            <div 
+                            <div
                               key={idx}
                               className="h-4 w-4 sm:h-5 sm:w-5 rounded border border-border"
                               style={{ backgroundColor: color }}
@@ -315,24 +316,24 @@ const History = () => {
                       {project.description || 'No description available'}
                     </p>
                   )}
-                  
+
                   <div className="flex items-center text-[10px] sm:text-xs text-muted-foreground mb-3 sm:mb-4">
                     <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                     {new Date(project.created_at).toLocaleDateString()}
                   </div>
                   <div className="flex space-x-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="flex-1 text-xs sm:text-sm h-8 sm:h-9"
                       onClick={() => navigate(`/projects/${project.id}`)}
                     >
                       <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                       View
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="flex-1 text-xs sm:text-sm h-8 sm:h-9"
                       disabled={!project.brief_data}
                       onClick={() => downloadBrief(project)}

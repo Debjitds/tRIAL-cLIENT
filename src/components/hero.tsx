@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play, Sparkles, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
+import LiquidEther from "@/components/LiquidEther";
 import student1 from "@/assets/student1.jpg";
 import student2 from "@/assets/student2.jpg";
 import student3 from "@/assets/student3.jpg";
@@ -10,9 +11,13 @@ const Hero = () => {
   return (
     <section id="hero" className="relative min-h-screen flex items-center justify-center bg-gradient-hero overflow-hidden pt-20 md:pt-0">
       {/* Background decorations */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-      <div className="absolute top-20 left-4 md:left-10 w-48 md:w-72 h-48 md:h-72 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-20 right-4 md:right-10 w-64 md:w-96 h-64 md:h-96 bg-accent/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      {/* Background decorations */}
+      <div className="absolute inset-0 z-0">
+        <LiquidEther
+          colors={['#5227FF', '#FF9FFC', '#B19EEF']}
+          autoDemo={true}
+        />
+      </div>
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-4xl mx-auto">

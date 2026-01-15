@@ -43,7 +43,7 @@ export default function Sitemap() {
     // Set content type and output
     const blob = new Blob([sitemap], { type: 'application/xml' });
     const url = URL.createObjectURL(blob);
-    
+
     // Download or display
     const a = document.createElement('a');
     a.href = url;
@@ -51,13 +51,13 @@ export default function Sitemap() {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    
+
     // Navigate back
     setTimeout(() => navigate('/'), 100);
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="min-h-screen bg-transparent flex items-center justify-center">
       <p className="text-foreground-secondary">Generating sitemap.xml...</p>
     </div>
   );

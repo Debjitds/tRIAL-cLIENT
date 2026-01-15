@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/navbar';
+
 import DashboardCards from '@/components/dashboard/DashboardCards';
 import RecentProjectsList from '@/components/dashboard/RecentProjectsList';
 import QuickActions from '@/components/dashboard/QuickActions';
@@ -55,9 +56,9 @@ const ClientDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <Navbar />
-      
+
       {/* Main content */}
       <main className="pt-20 pb-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -66,11 +67,11 @@ const ClientDashboard = () => {
             <h1 className="text-2xl sm:text-3xl font-display font-bold mb-2 text-foreground">
               <span className="hidden sm:inline">Hello, </span>
               <span className="text-gradient">
-                {user?.user_metadata?.display_name || 
-                 user?.user_metadata?.full_name || 
-                 user?.user_metadata?.name ||
-                 user?.email?.split('@')[0] || 
-                 'there'}
+                {user?.user_metadata?.display_name ||
+                  user?.user_metadata?.full_name ||
+                  user?.user_metadata?.name ||
+                  user?.email?.split('@')[0] ||
+                  'there'}
               </span>
               <span className="hidden sm:inline"> 👋</span>
             </h1>
@@ -109,8 +110,8 @@ const ClientDashboard = () => {
       </main>
 
       {/* Retry Modal - auto-opens when coming from 500 page */}
-      <ProjectDetailModal 
-        isOpen={showRetryModal} 
+      <ProjectDetailModal
+        isOpen={showRetryModal}
         onClose={() => {
           setShowRetryModal(false);
           setRetryData(null);

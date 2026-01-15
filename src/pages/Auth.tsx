@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Zap, Shield, Gift, Loader2 } from 'lucide-react';
@@ -69,7 +70,7 @@ const Auth = () => {
 
       // Type assertion for the response
       const result = data as { ok?: boolean; referred_credits?: number } | null;
-      
+
       if (result?.ok) {
         toast({
           title: '🎉 Welcome Bonus!',
@@ -93,7 +94,7 @@ const Auth = () => {
       navigate('/maintenance', { replace: true });
       return;
     }
-    
+
     setIsLoading(true);
     // Store referral code in sessionStorage for processing after OAuth callback
     if (referralCode) {
@@ -107,11 +108,11 @@ const Auth = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       {/* Background decorations */}
       <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      
+
       <div className="w-full max-w-md relative z-10">
         {/* Back button */}
         <Button
@@ -136,7 +137,7 @@ const Auth = () => {
             <CardDescription className="text-base">
               Sign in to start generating realistic client briefs with AI
             </CardDescription>
-            
+
             {/* Referral Banner */}
             {referralCode && (
               <div className="mt-4 p-3 bg-accent/10 border border-accent/30 rounded-lg flex items-center gap-2">

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useNavigate } from 'react-router-dom';
 
+
 export default function Notifications() {
   const navigate = useNavigate();
   const {
@@ -27,7 +28,7 @@ export default function Notifications() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-4 sm:py-8 lg:py-12">
+    <div className="min-h-screen bg-transparent py-4 sm:py-8 lg:py-12">
       <div className="container mx-auto px-4 max-w-3xl">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
@@ -90,14 +91,13 @@ export default function Notifications() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <Card className={`glass-card hover-lift cursor-pointer transition-all ${
-                    !notification.read ? 'border-l-4 border-l-primary bg-primary/5' : ''
-                  }`}>
+                  <Card className={`glass-card hover-lift cursor-pointer transition-all ${!notification.read ? 'border-l-4 border-l-primary bg-primary/5' : ''
+                    }`}>
                     <CardContent className="p-3 sm:p-4">
                       <div className="flex items-start justify-between gap-2 sm:gap-4">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center flex-wrap gap-1.5 mb-1.5">
-                            <Badge 
+                            <Badge
                               variant="outline"
                               className={`${styles.bg} ${styles.text} ${styles.border} text-[10px] sm:text-xs px-1.5 py-0 h-4 sm:h-5`}
                             >

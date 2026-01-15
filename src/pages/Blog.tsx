@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/navbar';
 
+
 const blogPosts = [
   {
     id: 1,
@@ -131,9 +132,9 @@ const blogPosts = [
 
 export default function Blog() {
   return (
-    <>
+    <div className="min-h-screen bg-transparent">
       <Navbar />
-      <div className="min-h-screen bg-background pt-24 pb-16">
+      <div className="pt-24 pb-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
           {/* Header */}
           <motion.div
@@ -221,6 +222,6 @@ export default function Blog() {
           </motion.div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

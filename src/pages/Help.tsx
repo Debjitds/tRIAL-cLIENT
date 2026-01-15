@@ -13,6 +13,7 @@ import { Helmet } from 'react-helmet';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
+
 const faqs = [
   {
     question: 'How do I generate my first project?',
@@ -55,7 +56,7 @@ export default function Help() {
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) {
       toast({
         title: 'Please log in',
@@ -116,7 +117,7 @@ export default function Help() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-4 sm:py-8 lg:py-12">
+    <div className="min-h-screen bg-transparent py-4 sm:py-8 lg:py-12">
       <Helmet>
         <title>Help & FAQ - tRIAL - cLIENTS</title>
         <meta name="description" content="Find answers to common questions about tRIAL - cLIENTS. Learn how to generate briefs, manage projects, and get the most from our platform." />
@@ -124,13 +125,13 @@ export default function Help() {
           {JSON.stringify(faqStructuredData)}
         </script>
       </Helmet>
-      
+
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6 sm:mb-8">
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => navigate(-1)}
             className="gap-1.5 text-xs sm:text-sm -ml-2"
           >

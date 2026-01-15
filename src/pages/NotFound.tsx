@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Home, RefreshCw, FileQuestion, Wifi } from "lucide-react";
 import { Link } from "react-router-dom";
 
+
 const NotFound = () => {
   const location = useLocation();
 
@@ -38,7 +39,7 @@ const NotFound = () => {
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Retry
               </Button>
-              
+
               <Button variant="outline" size="lg" className="w-full" asChild>
                 <Link to="/" className="flex items-center justify-center space-x-2">
                   <Home className="h-4 w-4" />

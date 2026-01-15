@@ -3,11 +3,12 @@ import Navbar from '@/components/navbar';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Users, Target, Zap, Heart } from 'lucide-react';
 
+
 const About = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <Navbar />
-      
+
       <main className="container mx-auto px-4 py-12 sm:py-20 max-w-4xl">
         <Link to="/">
           <Button variant="ghost" size="sm" className="mb-8 gap-2">
@@ -19,10 +20,10 @@ const About = () => {
         <h1 className="text-4xl sm:text-5xl font-bold text-gradient mb-6">
           About tRIAL - cLIENTS
         </h1>
-        
+
         <p className="text-lg text-muted-foreground mb-12 leading-relaxed">
-          We're on a mission to help designers, developers, and creative professionals 
-          sharpen their skills by providing realistic client briefs and project scenarios 
+          We're on a mission to help designers, developers, and creative professionals
+          sharpen their skills by providing realistic client briefs and project scenarios
           powered by AI.
         </p>
 
@@ -33,9 +34,9 @@ const About = () => {
             <h2 className="text-2xl font-semibold">Our Mission</h2>
           </div>
           <p className="text-muted-foreground leading-relaxed">
-            Practice makes perfect, but finding realistic projects to work on can be challenging. 
-            tRIAL - cLIENTS bridges that gap by generating authentic client briefs that simulate 
-            real-world scenarios. Whether you're a junior designer building your portfolio or an 
+            Practice makes perfect, but finding realistic projects to work on can be challenging.
+            tRIAL - cLIENTS bridges that gap by generating authentic client briefs that simulate
+            real-world scenarios. Whether you're a junior designer building your portfolio or an
             experienced developer exploring new industries, we've got you covered.
           </p>
         </section>
@@ -78,8 +79,8 @@ const About = () => {
             <h2 className="text-2xl font-semibold">Our Team</h2>
           </div>
           <p className="text-muted-foreground leading-relaxed">
-            We're a small team of designers and developers who understand the challenges 
-            of building a portfolio and gaining practical experience. We built tRIAL - cLIENTS 
+            We're a small team of designers and developers who understand the challenges
+            of building a portfolio and gaining practical experience. We built tRIAL - cLIENTS
             because we wished it existed when we were starting out.
           </p>
         </section>

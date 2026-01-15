@@ -15,6 +15,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+
+
 const Contact = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,9 +48,9 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <Navbar />
-      
+
       <main className="container mx-auto px-4 py-12 sm:py-20 max-w-5xl">
         <Link to="/">
           <Button variant="ghost" size="sm" className="mb-8 gap-2">
@@ -60,7 +62,7 @@ const Contact = () => {
         <h1 className="text-4xl sm:text-5xl font-bold text-gradient mb-6">
           Contact Us
         </h1>
-        
+
         <p className="text-lg text-muted-foreground mb-12 leading-relaxed max-w-2xl">
           Have a question, feedback, or just want to say hello? We'd love to hear from you.
         </p>
@@ -152,7 +154,7 @@ const Contact = () => {
           <div className="order-1 lg:order-2 space-y-8">
             <div className="p-6 rounded-xl bg-card border border-border">
               <h2 className="text-xl font-semibold mb-6">Get in Touch</h2>
-              
+
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
                   <div className="p-3 rounded-lg bg-primary/10">
@@ -160,8 +162,8 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-medium mb-1">Email</h3>
-                    <a 
-                      href="mailto:support@trial-clients.com" 
+                    <a
+                      href="mailto:support@trial-clients.com"
                       className="text-muted-foreground hover:text-primary transition-colors"
                     >
                       support@trial-clients.com
