@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type Props = {
     className?: string;
@@ -282,6 +283,14 @@ export const LaserFlow: React.FC<Props> = ({
     fogFallSpeed = 0.6,
     color = '#FF79C6'
 }) => {
+    const isMobile = useIsMobile();
+
+    // Mobile optimizations
+    const mobileWispDensity = isMobile ? 0.6 : wispDensity;
+    const mobileFogIntensity = isMobile ? fogIntensity * 0.6 : fogIntensity;
+    const mobileFogScale = isMobile ? fogScale * 1.5 : fogScale; // Less detail needed on mobile
+    const mobileMaxDpr = isMobile ? 1 : (dpr ?? (window.devicePixelRatio || 1));
+
     const mountRef = useRef<HTMLDivElement | null>(null);
     const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
     const uniformsRef = useRef<any>(null);
@@ -323,7 +332,7 @@ export const LaserFlow: React.FC<Props> = ({
         });
         rendererRef.current = renderer;
 
-        baseDprRef.current = Math.min(dpr ?? (window.devicePixelRatio || 1), 2);
+        baseDprRef.current = Math.min(mobileMaxDpr, 2);
         currentDprRef.current = baseDprRef.current;
 
         renderer.setPixelRatio(currentDprRef.current);
@@ -346,7 +355,7 @@ export const LaserFlow: React.FC<Props> = ({
             iTime: { value: 0 },
             iResolution: { value: new THREE.Vector3(1, 1, 1) },
             iMouse: { value: new THREE.Vector4(0, 0, 0, 0) },
-            uWispDensity: { value: wispDensity },
+            uWispDensity: { value: mobileWispDensity },
             uTiltScale: { value: mouseTiltStrength },
             uFlowTime: { value: 0 },
             uFogTime: { value: 0 },
@@ -355,8 +364,8 @@ export const LaserFlow: React.FC<Props> = ({
             uFlowSpeed: { value: flowSpeed },
             uVLenFactor: { value: verticalSizing },
             uHLenFactor: { value: horizontalSizing },
-            uFogIntensity: { value: fogIntensity },
-            uFogScale: { value: fogScale },
+            uFogIntensity: { value: mobileFogIntensity },
+            uFogScale: { value: mobileFogScale },
             uWSpeed: { value: wispSpeed },
             uWIntensity: { value: wispIntensity },
             uFlowStrength: { value: flowStrength },
@@ -562,15 +571,15 @@ export const LaserFlow: React.FC<Props> = ({
         const uniforms = uniformsRef.current;
         if (!uniforms) return;
 
-        uniforms.uWispDensity.value = wispDensity;
+        uniforms.uWispDensity.value = mobileWispDensity;
         uniforms.uTiltScale.value = mouseTiltStrength;
         uniforms.uBeamXFrac.value = horizontalBeamOffset;
         uniforms.uBeamYFrac.value = verticalBeamOffset;
         uniforms.uFlowSpeed.value = flowSpeed;
         uniforms.uVLenFactor.value = verticalSizing;
         uniforms.uHLenFactor.value = horizontalSizing;
-        uniforms.uFogIntensity.value = fogIntensity;
-        uniforms.uFogScale.value = fogScale;
+        uniforms.uFogIntensity.value = mobileFogIntensity;
+        uniforms.uFogScale.value = mobileFogScale;
         uniforms.uWSpeed.value = wispSpeed;
         uniforms.uWIntensity.value = wispIntensity;
         uniforms.uFlowStrength.value = flowStrength;
@@ -581,15 +590,15 @@ export const LaserFlow: React.FC<Props> = ({
         const { r, g, b } = hexToRGB(color || '#FFFFFF');
         uniforms.uColor.value.set(r, g, b);
     }, [
-        wispDensity,
+        mobileWispDensity,
         mouseTiltStrength,
         horizontalBeamOffset,
         verticalBeamOffset,
         flowSpeed,
         verticalSizing,
         horizontalSizing,
-        fogIntensity,
-        fogScale,
+        mobileFogIntensity,
+        mobileFogScale,
         wispSpeed,
         wispIntensity,
         flowStrength,

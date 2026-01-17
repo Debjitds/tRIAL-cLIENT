@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export interface LiquidEtherProps {
   mouseForce?: number;
@@ -75,6 +76,14 @@ export default function LiquidEther({
   autoResumeDelay = 1000,
   autoRampDuration = 0.6
 }: LiquidEtherProps): React.ReactElement {
+  const isMobile = useIsMobile();
+
+  // Mobile overrides
+  const _resolution = isMobile && resolution > 0.25 ? 0.25 : resolution;
+  const _iterationsViscous = isMobile && iterationsViscous > 12 ? 12 : iterationsViscous;
+  const _iterationsPoisson = isMobile && iterationsPoisson > 12 ? 12 : iterationsPoisson;
+  const _BFECC = isMobile ? false : BFECC;
+
   const mountRef = useRef<HTMLDivElement | null>(null);
   const webglRef = useRef<LiquidEtherWebGL | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
@@ -1109,11 +1118,11 @@ export default function LiquidEther({
         cursor_size: cursorSize,
         isViscous,
         viscous,
-        iterations_viscous: iterationsViscous,
-        iterations_poisson: iterationsPoisson,
+        iterations_viscous: _iterationsViscous,
+        iterations_poisson: _iterationsPoisson,
         dt,
-        BFECC,
-        resolution,
+        BFECC: _BFECC,
+        resolution: _resolution,
         isBounce
       });
       if (resolution !== prevRes) sim.resize();
@@ -1171,15 +1180,15 @@ export default function LiquidEther({
       webglRef.current = null;
     };
   }, [
-    BFECC,
+    _BFECC,
     cursorSize,
     dt,
     isBounce,
     isViscous,
-    iterationsPoisson,
-    iterationsViscous,
+    _iterationsPoisson,
+    _iterationsViscous,
     mouseForce,
-    resolution,
+    _resolution,
     viscous,
     colors,
     autoDemo,
@@ -1201,11 +1210,11 @@ export default function LiquidEther({
       cursor_size: cursorSize,
       isViscous,
       viscous,
-      iterations_viscous: iterationsViscous,
-      iterations_poisson: iterationsPoisson,
+      iterations_viscous: _iterationsViscous,
+      iterations_poisson: _iterationsPoisson,
       dt,
-      BFECC,
-      resolution,
+      BFECC: _BFECC,
+      resolution: _resolution,
       isBounce
     });
     if (webgl.autoDriver) {
@@ -1218,17 +1227,17 @@ export default function LiquidEther({
         webgl.autoDriver.mouse.takeoverDuration = takeoverDuration;
       }
     }
-    if (resolution !== prevRes) sim.resize();
+    if (_resolution !== prevRes) sim.resize();
   }, [
     mouseForce,
     cursorSize,
     isViscous,
     viscous,
-    iterationsViscous,
-    iterationsPoisson,
+    _iterationsViscous,
+    _iterationsPoisson,
     dt,
-    BFECC,
-    resolution,
+    _BFECC,
+    _resolution,
     isBounce,
     autoDemo,
     autoSpeed,
