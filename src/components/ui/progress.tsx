@@ -1,26 +1,34 @@
 import * as React from "react";
 import * as ProgressPrimitive from "@radix-ui/react-progress";
-import { Check } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ProgressProps extends React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> {
   showLabel?: boolean;
   label?: string;
-  variant?: 'default' | 'success' | 'warning' | 'gradient';
+  variant?: 'default' | 'success' | 'warning' | 'gradient' | 'exhausted';
+  /** When true, 100% means exhausted (negative), not complete (positive) */
+  isExhaustedState?: boolean;
 }
 
 const Progress = React.forwardRef<
   React.ElementRef<typeof ProgressPrimitive.Root>,
   ProgressProps
->(({ className, value, showLabel = false, label, variant = 'default', ...props }, ref) => {
-  const isComplete = value === 100;
+>(({ className, value, showLabel = false, label, variant = 'default', isExhaustedState = false, ...props }, ref) => {
+  // Clamp value between 0 and 100 to prevent overflow
+  const clampedValue = Math.max(0, Math.min(100, value || 0));
+  const isFullyUsed = clampedValue >= 100;
   
   const variantStyles = {
     default: 'bg-primary',
     success: 'bg-success',
     warning: 'bg-warning',
-    gradient: 'bg-gradient-primary'
+    gradient: 'bg-gradient-primary',
+    exhausted: 'bg-destructive'
   };
+
+  // Determine which variant to use - if exhausted state and fully used, use exhausted style
+  const effectiveVariant = isExhaustedState && isFullyUsed ? 'exhausted' : variant;
 
   return (
     <div className="w-full space-y-2">
@@ -30,13 +38,13 @@ const Progress = React.forwardRef<
             {label || 'Progress'}
           </span>
           <span className="text-foreground font-medium">
-            {isComplete ? (
-              <span className="flex items-center gap-1 text-success">
-                <Check className="h-3 w-3" />
-                Complete
+            {isFullyUsed && isExhaustedState ? (
+              <span className="flex items-center gap-1 text-destructive">
+                <AlertCircle className="h-3 w-3" />
+                Exhausted
               </span>
             ) : (
-              `${Math.round(value || 0)}%`
+              `${Math.round(clampedValue)}%`
             )}
           </span>
         </div>
@@ -52,12 +60,11 @@ const Progress = React.forwardRef<
         <ProgressPrimitive.Indicator
           className={cn(
             "h-full w-full flex-1 transition-all duration-500 ease-out rounded-full",
-            variantStyles[variant],
-            isComplete && "animate-pulse"
+            variantStyles[effectiveVariant]
           )}
           style={{ 
-            transform: `translateX(-${100 - (value || 0)}%)`,
-            boxShadow: value && value > 0 ? '0 0 12px hsl(var(--primary) / 0.4)' : 'none'
+            transform: `translateX(-${100 - clampedValue}%)`,
+            boxShadow: clampedValue > 0 ? `0 0 12px hsl(var(--${effectiveVariant === 'exhausted' ? 'destructive' : 'primary'}) / 0.4)` : 'none'
           }}
         />
         {/* Shimmer effect for indeterminate state */}

@@ -106,8 +106,6 @@ export const useQuotaManagement = () => {
       return { available: false, remaining: 0, limit: 0, isLocked: false, creditCost: 0, canUseCredits: false };
     }
 
-    const freeQuotas = PLAN_FREE_QUOTAS[quotaData.plan];
-    const limit = freeQuotas[level];
     const creditCost = CREDIT_COSTS[level];
     
     // Veteran level is locked for free plan users
@@ -121,6 +119,13 @@ export const useQuotaManagement = () => {
         canUseCredits: false
       };
     }
+
+    // CRITICAL: Use the ORIGINAL plan's free quota limits, NOT the current plan
+    // Free quota limits are set at signup based on the FREE plan and never change
+    // Purchasing credits upgrades the plan but should NOT change free quota limits
+    // Free quotas only reset on the monthly cycle
+    const originalFreePlanQuotas = PLAN_FREE_QUOTAS['free'];
+    const limit = originalFreePlanQuotas[level];
 
     const remaining = quotaData.quotas[`${level}Left` as keyof typeof quotaData.quotas] as number;
     const canUseCredits = quotaData.credits >= creditCost;

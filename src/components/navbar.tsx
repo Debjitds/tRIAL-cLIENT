@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Bell } from "lucide-react";
 import logo from "@/assets/logo.png";
-import videocamIcon from "@/assets/videocam-icon.svg";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import UserMenu from "@/components/UserMenu";
@@ -10,6 +9,7 @@ import { NotificationsPanel } from "@/components/NotificationsPanel";
 import { Badge } from "@/components/ui/badge";
 import { useNotifications } from "@/hooks/useNotifications";
 import { ReferralModal } from "@/components/modals/ReferralModal";
+import { AdRewardButton } from "@/components/AdRewardButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -112,17 +112,7 @@ const Navbar = () => {
                     )}
                   </Button>
                 </NotificationsPanel>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9"
-                >
-                  <img 
-                    src={videocamIcon} 
-                    alt="Video" 
-                    className="h-4 w-4 sm:h-5 sm:w-5 invert dark:invert-0"
-                  />
-                </Button>
+                <AdRewardButton />
                 <UserMenu onReferClick={() => setReferralModalOpen(true)} />
               </div>
             ) : (

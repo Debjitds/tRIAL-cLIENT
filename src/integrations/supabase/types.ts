@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_reward_attempts: {
+        Row: {
+          attempted_at: string
+          created_at: string
+          credits_awarded: number | null
+          id: string
+          rewarded: boolean
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          created_at?: string
+          credits_awarded?: number | null
+          id?: string
+          rewarded?: boolean
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string
+          created_at?: string
+          credits_awarded?: number | null
+          id?: string
+          rewarded?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_audit_logs: {
         Row: {
           action_type: string
@@ -99,6 +126,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      credit_transactions: {
+        Row: {
+          amount: number
+          balance_after: number
+          created_at: string
+          description: string
+          id: string
+          metadata: Json | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          balance_after: number
+          created_at?: string
+          description: string
+          id?: string
+          metadata?: Json | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          description?: string
+          id?: string
+          metadata?: Json | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -312,6 +372,7 @@ export type Database = {
           id: string
           intermediate_left: number
           plan: string
+          razorpay_payment_id: string | null
           reset_at: string
           updated_at: string
           user_id: string
@@ -324,6 +385,7 @@ export type Database = {
           id?: string
           intermediate_left?: number
           plan?: string
+          razorpay_payment_id?: string | null
           reset_at?: string
           updated_at?: string
           user_id: string
@@ -336,6 +398,7 @@ export type Database = {
           id?: string
           intermediate_left?: number
           plan?: string
+          razorpay_payment_id?: string | null
           reset_at?: string
           updated_at?: string
           user_id?: string
@@ -588,6 +651,7 @@ export type Database = {
         Returns: Json
       }
       can_submit_social_reward: { Args: { _user_id: string }; Returns: Json }
+      check_ad_reward_eligibility: { Args: never; Returns: Json }
       check_and_consume_quota: {
         Args: { _level: string; _user_id: string }
         Returns: Json
@@ -602,6 +666,7 @@ export type Database = {
       }
       delete_user_account: { Args: never; Returns: undefined }
       generate_referral_code: { Args: never; Returns: string }
+      get_maintenance_mode: { Args: never; Returns: Json }
       get_social_reward_cooldown: { Args: never; Returns: Json }
       has_role: {
         Args: {
@@ -610,7 +675,19 @@ export type Database = {
         }
         Returns: boolean
       }
+      insert_credit_transaction: {
+        Args: {
+          _amount: number
+          _balance_after: number
+          _description: string
+          _metadata?: Json
+          _type: string
+          _user_id: string
+        }
+        Returns: string
+      }
       is_maintenance_mode: { Args: never; Returns: boolean }
+      process_ad_reward_attempt: { Args: { _user_id: string }; Returns: Json }
       process_referral:
         | { Args: { _referral_code: string }; Returns: Json }
         | {

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FolderOpen, CreditCard, Loader2 } from 'lucide-react';
+import { FolderOpen, CreditCard, Loader2, Gift, Coins, History } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuotaManagement } from '@/hooks/useQuotaManagement';
+import { Badge } from '@/components/ui/badge';
+import { Link } from 'react-router-dom';
 
 const DashboardCards = () => {
   const { user } = useAuth();
@@ -109,51 +111,86 @@ const DashboardCards = () => {
 
   const isLoading = loading || quotaLoading;
 
-  const cards = [
-    {
-      title: 'Projects Generated',
-      value: isLoading ? '-' : projectCount.toString(),
-      icon: FolderOpen,
-      description: 'Total projects created',
-      trend: isLoading ? '' : `+${weeklyCount} this week`
-    },
-    {
-      title: 'Free Credits',
-      value: isLoading ? '-' : getTotalFreeCredits().toString(),
-      icon: CreditCard,
-      description: `${getPurchasedCredits()} purchased credits`,
-      trend: quotaData ? `${quotaData.plan.toUpperCase()} plan` : ''
-    }
-  ];
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {cards.map((card, index) => {
-        const Icon = card.icon;
-        return (
-          <Card key={index} className="bg-card/50 backdrop-blur-sm border-border/30 hover-lift">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {card.title}
-              </CardTitle>
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-              ) : (
-                <Icon className="h-4 w-4 text-muted-foreground" />
-              )}
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">{card.value}</div>
-              <p className="text-xs text-muted-foreground">
-                {card.description}
-              </p>
-              <p className="text-xs text-accent mt-1">
-                {card.trend}
-              </p>
-            </CardContent>
-          </Card>
-        );
-      })}
+      {/* Projects Generated Card */}
+      <Card className="bg-card/50 backdrop-blur-sm border-border/30 hover-lift">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
+            Projects Generated
+          </CardTitle>
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          ) : (
+            <FolderOpen className="h-4 w-4 text-muted-foreground" />
+          )}
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-foreground">
+            {isLoading ? '-' : projectCount.toString()}
+          </div>
+          <p className="text-xs text-muted-foreground">Total projects created</p>
+          <p className="text-xs text-accent mt-1">
+            {isLoading ? '' : `+${weeklyCount} this week`}
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Credits Breakdown Card */}
+      <Card className="bg-card/50 backdrop-blur-sm border-border/30 hover-lift">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
+            Your Credits
+          </CardTitle>
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          ) : (
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
+          )}
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-foreground">
+            {isLoading ? '-' : (getTotalFreeCredits() + getPurchasedCredits()).toString()}
+          </div>
+          
+          {/* Credit Breakdown Visual Indicator */}
+          {!isLoading && quotaData && (
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <Gift className="h-3 w-3 text-emerald-400" />
+                  Free quota remaining
+                </span>
+                <Badge variant="outline" className="text-emerald-400 border-emerald-400/30 bg-emerald-400/10 text-xs px-1.5 py-0">
+                  {getTotalFreeCredits()}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <Coins className="h-3 w-3 text-primary" />
+                  Purchased credits
+                </span>
+                <Badge variant="outline" className="text-primary border-primary/30 bg-primary/10 text-xs px-1.5 py-0">
+                  {getPurchasedCredits()}
+                </Badge>
+              </div>
+            </div>
+          )}
+          
+          <div className="flex items-center justify-between mt-3 pt-2 border-t border-border/30">
+            <p className="text-xs text-accent">
+              {quotaData ? `${quotaData.plan.toUpperCase()} plan` : ''}
+            </p>
+            <Link 
+              to="/credits/history" 
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+            >
+              <History className="h-3 w-3" />
+              View history
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

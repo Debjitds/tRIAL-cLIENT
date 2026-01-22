@@ -1,11 +1,14 @@
-import { Check, ArrowLeft, X, Zap, Crown, Mail } from 'lucide-react';
+import { Check, ArrowLeft, X, Zap, Crown, Mail, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-
-
+import { useRazorpay } from '@/hooks/useRazorpay';
+import { useAuth } from '@/contexts/AuthContext';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 const plans = [
   {
     name: 'Free',
@@ -58,9 +61,85 @@ const plans = [
 
 export default function Pricing() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { initiatePayment, loading: paymentLoading, verifying } = useRazorpay();
+  const [currentPlan, setCurrentPlan] = useState<string>('free');
+  const [loadingPlan, setLoadingPlan] = useState(true);
+
+  // Fetch current user plan
+  useEffect(() => {
+    const fetchPlan = async () => {
+      if (!user) {
+        setLoadingPlan(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('subscriptions')
+          .select('plan')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) throw error;
+        setCurrentPlan(data?.plan || 'free');
+      } catch (err) {
+        console.error('Error fetching plan:', err);
+      } finally {
+        setLoadingPlan(false);
+      }
+    };
+
+    fetchPlan();
+  }, [user]);
+
+  const handleUpgrade = async (planName: string) => {
+    if (!user) {
+      toast.error('Please sign in to upgrade');
+      navigate('/auth');
+      return;
+    }
+
+    if (planName === 'Free') {
+      toast.info('You are already on the Free plan');
+      return;
+    }
+
+    if (planName === 'Pro') {
+      await initiatePayment('pro', () => {
+        setCurrentPlan('pro');
+        navigate('/dashboard');
+      });
+    }
+  };
+
+  const getButtonText = (planName: string) => {
+    if (loadingPlan) return 'Loading...';
+    
+    if (planName === 'Free') {
+      return currentPlan === 'free' ? 'Current Plan' : 'Downgrade';
+    }
+    
+    if (planName === 'Pro') {
+      if (currentPlan === 'pro' || currentPlan === 'proplus') {
+        return 'Current Plan';
+      }
+      return 'Upgrade to Pro';
+    }
+    
+    return 'Contact Us';
+  };
+
+  const isButtonDisabled = (planName: string) => {
+    if (loadingPlan || paymentLoading || verifying) return true;
+    if (planName === 'Free' && currentPlan === 'free') return true;
+    if (planName === 'Pro' && (currentPlan === 'pro' || currentPlan === 'proplus')) return true;
+    if (planName === 'Contact') return false;
+    return false;
+  };
 
   return (
-    <div className="min-h-screen bg-transparent py-6 sm:py-12 lg:py-20">
+    <div className="min-h-screen bg-background py-6 sm:py-12 lg:py-20">
       <div className="container mx-auto px-4">
         {/* Close/Back buttons */}
         <div className="flex items-center justify-between mb-6 sm:mb-8 max-w-6xl mx-auto">
@@ -83,7 +162,7 @@ export default function Pricing() {
             <X className="h-4 w-4" />
           </Button>
         </div>
-
+        
         <div className="text-center mb-8 sm:mb-12 lg:mb-16">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-3 sm:mb-4">
             Simple, Transparent Pricing
@@ -102,10 +181,11 @@ export default function Pricing() {
               transition={{ delay: index * 0.1 }}
               className="flex"
             >
-              <Card className={`glass-card flex flex-col w-full relative ${plan.highlighted
-                ? 'border-primary shadow-glow ring-2 ring-primary/20'
-                : 'border-border/30'
-                }`}>
+              <Card className={`glass-card flex flex-col w-full relative ${
+                plan.highlighted 
+                  ? 'border-primary shadow-glow ring-2 ring-primary/20' 
+                  : 'border-border/30'
+              }`}>
                 {plan.highlighted && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                     <Badge className="bg-gradient-primary text-primary-foreground px-3 py-1 text-xs font-semibold">
@@ -113,14 +193,16 @@ export default function Pricing() {
                     </Badge>
                   </div>
                 )}
-
+                
                 <CardHeader className="text-center pb-4 pt-6 sm:pt-8">
-                  <div className={`w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 rounded-xl flex items-center justify-center ${plan.highlighted ? 'bg-gradient-primary' : 'bg-muted'
-                    }`}>
-                    <plan.icon className={`h-6 w-6 sm:h-7 sm:w-7 ${plan.highlighted ? 'text-primary-foreground' : 'text-foreground'
-                      }`} />
+                  <div className={`w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 rounded-xl flex items-center justify-center ${
+                    plan.highlighted ? 'bg-gradient-primary' : 'bg-muted'
+                  }`}>
+                    <plan.icon className={`h-6 w-6 sm:h-7 sm:w-7 ${
+                      plan.highlighted ? 'text-primary-foreground' : 'text-foreground'
+                    }`} />
                   </div>
-
+                  
                   <CardTitle className="text-xl sm:text-2xl text-foreground">{plan.name}</CardTitle>
                   <CardDescription className="text-muted-foreground text-sm">{plan.description}</CardDescription>
                   <div className="mt-3 sm:mt-4">
@@ -128,10 +210,10 @@ export default function Pricing() {
                     <span className="text-muted-foreground text-sm">/month</span>
                   </div>
                 </CardHeader>
-
+                
                 <CardContent className="flex-1 flex flex-col">
                   {plan.isContact ? (
-                    <Button
+                    <Button 
                       className="w-full mb-4 sm:mb-6"
                       variant="outline"
                       asChild
@@ -142,17 +224,27 @@ export default function Pricing() {
                       </a>
                     </Button>
                   ) : (
-                    <Button
-                      className={`w-full mb-4 sm:mb-6 ${plan.highlighted
-                        ? 'bg-gradient-primary hover:opacity-90'
-                        : ''
-                        }`}
+                    <Button 
+                      className={`w-full mb-4 sm:mb-6 ${
+                        plan.highlighted 
+                          ? 'bg-gradient-primary hover:opacity-90' 
+                          : ''
+                      }`}
                       variant={plan.highlighted ? 'default' : 'outline'}
+                      disabled={isButtonDisabled(plan.name)}
+                      onClick={() => handleUpgrade(plan.name)}
                     >
-                      {plan.cta}
+                      {(paymentLoading || verifying) && plan.name === 'Pro' ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          {verifying ? 'Verifying...' : 'Processing...'}
+                        </>
+                      ) : (
+                        getButtonText(plan.name)
+                      )}
                     </Button>
                   )}
-
+                  
                   <ul className="space-y-2 sm:space-y-3 flex-1">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex items-start">

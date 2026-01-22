@@ -9,6 +9,7 @@ import { AdminProtectedRoute } from "./components/auth/AdminProtectedRoute";
 import { MaintenanceGuard } from "./components/auth/MaintenanceGuard";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import NonAdminLayout from "./components/layout/NonAdminLayout";
 import Auth from "./pages/Auth";
 import UserLogin from "./pages/UserLogin";
 import AdminLogin from "./pages/AdminLogin";
@@ -27,8 +28,8 @@ import Sitemap from "./pages/Sitemap";
 import About from "./pages/About";
 import Support from "./pages/Support";
 import Contact from "./pages/Contact";
+import CreditHistory from "./pages/CreditHistory";
 import { ForbiddenPage, ServerErrorPage, MaintenancePage } from "./pages/ErrorPages";
-import NonAdminLayout from "./components/layout/NonAdminLayout";
 
 const queryClient = new QueryClient();
 
@@ -42,18 +43,18 @@ const App = () => (
             <Sonner />
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/login/admin" element={<AdminLogin />} />
-              <Route path="/admin/*" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
-
-              {/* Wraps all non-admin pages with the new background */}
+              
+              {/* Wraps all non-admin pages with the dynamic background */}
               <Route element={<NonAdminLayout />}>
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/login/user" element={<UserLogin />} />
+                <Route path="/login/admin" element={<AdminLogin />} />
                 <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="/dashboard" element={<ProtectedRoute><ClientDashboard /></ProtectedRoute>} />
                 <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
                 <Route path="/projects/:id" element={<ProtectedRoute><ProjectWorkspace /></ProtectedRoute>} />
                 <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
+                <Route path="/credits/history" element={<ProtectedRoute><CreditHistory /></ProtectedRoute>} />
                 <Route path="/account/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
                 <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
@@ -61,13 +62,15 @@ const App = () => (
                 <Route path="/about" element={<About />} />
                 <Route path="/support" element={<Support />} />
                 <Route path="/contact" element={<Contact />} />
-                <Route path="/sitemap.xml" element={<Sitemap />} />
                 <Route path="/403" element={<ForbiddenPage />} />
                 <Route path="/500" element={<ServerErrorPage />} />
                 <Route path="/maintenance" element={<MaintenancePage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Route>
+
+              <Route path="/sitemap.xml" element={<Sitemap />} />
+              <Route path="/admin/*" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
             </Routes>
           </MaintenanceGuard>
         </AuthProvider>

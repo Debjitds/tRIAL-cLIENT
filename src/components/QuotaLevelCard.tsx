@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, Zap, Scissors, Crown, Info } from 'lucide-react';
+import { Lock, Zap, Scissors, Crown, Info, AlertCircle, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -240,42 +240,81 @@ export const QuotaLevelCard = ({
             </Badge>
           </div>
 
-          {/* Quota Progress Bar */}
-          {remaining !== 'locked' && typeof remaining === 'number' && typeof limit === 'number' && limit > 0 && (
-            <div className="mt-4 px-2">
-              <Progress 
-                value={((limit - remaining) / limit) * 100} 
-                showLabel 
-                label="Free quota used"
-                variant={remaining === 0 ? 'warning' : remaining <= 1 ? 'warning' : 'default'}
-              />
+          {/* Quota Status Section - Clear states */}
+          {remaining !== 'locked' && typeof remaining === 'number' && typeof limit === 'number' && (
+            <div className="mt-4 px-2 space-y-3">
+              {/* Show progress bar only if there's a quota limit */}
+              {limit > 0 && (
+                <Progress 
+                  value={Math.min(100, ((limit - remaining) / limit) * 100)} 
+                  showLabel 
+                  label="Free quota used"
+                  isExhaustedState={true}
+                  variant={remaining === 0 ? 'exhausted' : remaining === 1 ? 'warning' : 'default'}
+                />
+              )}
+              
+              {/* Exhausted State Banner */}
+              {remaining === 0 && (
+                <div className="flex items-center gap-2 px-3 py-2 bg-destructive/10 rounded-lg border border-destructive/30 text-destructive">
+                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                  <span className="text-xs font-medium">Free quota exhausted • Credits required</span>
+                </div>
+              )}
             </div>
           )}
 
           {/* Quota & Credit Info */}
           <div className="mt-4 space-y-2 text-sm">
-            <div className="flex justify-between items-center px-4 py-2 bg-muted/30 rounded-lg">
-              <span className="text-muted-foreground">Free left:</span>
-              <span className="font-semibold">
-                {remaining === 'locked' ? (
-                  <span className="text-muted-foreground">—</span>
-                ) : (
-                  <span className={remaining > 0 ? 'text-emerald-400' : 'text-muted-foreground'}>
-                    {remaining} / {limit}
-                  </span>
-                )}
-              </span>
-            </div>
+            {/* Free quota remaining - only show if not exhausted */}
+            {remaining !== 'locked' && typeof remaining === 'number' && typeof limit === 'number' && remaining > 0 && (
+              <div className="flex justify-between items-center px-4 py-2 bg-muted/30 rounded-lg">
+                <span className="text-muted-foreground">Free remaining:</span>
+                <span className="font-semibold text-emerald-400">
+                  {remaining} / {limit}
+                </span>
+              </div>
+            )}
+            
+            {/* Credit cost - always visible */}
             <div className="flex justify-between items-center px-4 py-2 bg-muted/30 rounded-lg">
               <span className="text-muted-foreground">Credit cost:</span>
               <span className="font-semibold text-primary">{creditCost} credit{creditCost > 1 ? 's' : ''}</span>
             </div>
-            {remaining !== 'locked' && remaining <= 0 && (
-              <div className="flex justify-between items-center px-4 py-2 bg-primary/10 rounded-lg border border-primary/20">
-                <span className="text-muted-foreground">Your credits:</span>
+            
+            {/* Credits available - show when free quota exhausted or when will be needed */}
+            {remaining !== 'locked' && typeof remaining === 'number' && remaining === 0 && (
+              <div className={`flex justify-between items-center px-4 py-2 rounded-lg border ${
+                availableCredits >= creditCost 
+                  ? 'bg-emerald-500/10 border-emerald-500/30' 
+                  : 'bg-destructive/10 border-destructive/30'
+              }`}>
+                <span className="text-muted-foreground flex items-center gap-1.5">
+                  <Coins className="h-3.5 w-3.5" />
+                  Your credits:
+                </span>
                 <span className={`font-semibold ${availableCredits >= creditCost ? 'text-emerald-400' : 'text-destructive'}`}>
                   {availableCredits}
                 </span>
+              </div>
+            )}
+            
+            {/* Insufficient credits warning with Get Credits button */}
+            {remaining !== 'locked' && typeof remaining === 'number' && remaining === 0 && availableCredits < creditCost && (
+              <div className="flex flex-col gap-2 px-3 py-2 bg-amber-500/10 rounded-lg border border-amber-500/30">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-amber-400 flex-shrink-0" />
+                  <span className="text-xs text-amber-400">
+                    Need {creditCost - availableCredits} more credit{creditCost - availableCredits > 1 ? 's' : ''} to generate
+                  </span>
+                </div>
+                <Link 
+                  to="/pricing" 
+                  className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md text-xs font-medium transition-colors"
+                >
+                  <Coins className="h-3 w-3" />
+                  Get More Credits
+                </Link>
               </div>
             )}
           </div>
