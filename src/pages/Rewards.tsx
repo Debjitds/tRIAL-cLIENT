@@ -80,7 +80,6 @@ const Rewards = () => {
               <CardContent>
                 <div className="text-sm text-foreground-secondary space-y-1">
                   <p>• Daily login streaks</p>
-                  <p>• Social sharing bonuses</p>
                   <p>• Achievement rewards</p>
                 </div>
               </CardContent>
