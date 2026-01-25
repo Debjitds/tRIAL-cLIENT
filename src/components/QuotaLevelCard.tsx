@@ -10,6 +10,7 @@ import { LevelType } from '@/hooks/useQuotaManagement';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Progress } from '@/components/ui/progress';
+import { CreditPackModal } from '@/components/modals/CreditPackModal';
 
 interface QuotaLevelCardProps {
   level: LevelType;
@@ -169,16 +170,17 @@ export const QuotaLevelCard = ({
 }: QuotaLevelCardProps) => {
   const [projectType, setProjectType] = useState('');
   const [industry, setIndustry] = useState('');
+  const [showCreditPackModal, setShowCreditPackModal] = useState(false);
 
   // Filter project types based on selected industry
   const availableProjectTypes = useMemo(() => {
     const levelProjectTypes = allProjectTypes[level];
-
+    
     if (!industry) {
       // No industry selected - show only universal types
       return levelProjectTypes.filter(pt => pt.universal);
     }
-
+    
     // Show universal types + industry-specific types that match selected industry
     return levelProjectTypes.filter(pt => {
       if (pt.universal) return true;
@@ -224,16 +226,16 @@ export const QuotaLevelCard = ({
       animate={{ opacity: 1, scale: 1 }}
       className="relative h-full"
     >
-      <Card
+      <Card 
         className={`bg-card/50 backdrop-blur-sm border-2 ${config.borderColor} relative h-full flex flex-col ${isLocked ? 'opacity-75' : ''}`}
       >
         <CardHeader className="text-center pb-6 pt-8">
           <div className={`w-14 h-14 mx-auto mb-4 rounded-xl flex items-center justify-center ${config.iconBg}`}>
             <Icon className={`h-7 w-7 ${config.iconColor}`} />
           </div>
-
+          
           <CardTitle className="text-xl sm:text-2xl font-display">{title}</CardTitle>
-
+          
           <div className="mt-3">
             <Badge className={`${config.badgeColor} border-0`}>
               {level}
@@ -245,20 +247,20 @@ export const QuotaLevelCard = ({
             <div className="mt-4 px-2 space-y-3">
               {/* Show progress bar only if there's a quota limit */}
               {limit > 0 && (
-                <Progress
-                  value={Math.min(100, ((limit - remaining) / limit) * 100)}
-                  showLabel
+                <Progress 
+                  value={Math.min(100, ((limit - remaining) / limit) * 100)} 
+                  showLabel 
                   label="Free quota used"
                   isExhaustedState={true}
                   variant={remaining === 0 ? 'exhausted' : remaining === 1 ? 'warning' : 'default'}
                 />
               )}
-
+              
               {/* Exhausted State Banner */}
               {remaining === 0 && (
                 <div className="flex items-center gap-2 px-3 py-2 bg-destructive/10 rounded-lg border border-destructive/30 text-destructive">
                   <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                  <span className="text-xs font-medium">Free quota unavailable • Credits required</span>
+                  <span className="text-xs font-medium">Free quota exhausted • Credits required</span>
                 </div>
               )}
             </div>
@@ -275,45 +277,47 @@ export const QuotaLevelCard = ({
                 </span>
               </div>
             )}
-
+            
             {/* Credit cost - always visible */}
             <div className="flex justify-between items-center px-4 py-2 bg-muted/30 rounded-lg">
               <span className="text-muted-foreground">Credit cost:</span>
               <span className="font-semibold text-primary">{creditCost} credit{creditCost > 1 ? 's' : ''}</span>
             </div>
-
-            {/* Credits available - show when free quota exhausted or when will be needed */}
-            {remaining !== 'locked' && typeof remaining === 'number' && remaining === 0 && (
-              <div className={`flex justify-between items-center px-4 py-2 rounded-lg border ${availableCredits >= creditCost
-                  ? 'bg-emerald-500/10 border-emerald-500/30'
+            
+            {/* Credits available - ALWAYS show for veteran (no free quota) or when free quota exhausted */}
+            {remaining !== 'locked' && typeof remaining === 'number' && (remaining === 0 || level === 'veteran') && (
+              <div className={`flex justify-between items-center px-4 py-2 rounded-lg border ${
+                availableCredits >= creditCost 
+                  ? 'bg-accent/10 border-accent/30' 
                   : 'bg-destructive/10 border-destructive/30'
-                }`}>
+              }`}>
                 <span className="text-muted-foreground flex items-center gap-1.5">
                   <Coins className="h-3.5 w-3.5" />
                   Your credits:
                 </span>
-                <span className={`font-semibold ${availableCredits >= creditCost ? 'text-emerald-400' : 'text-destructive'}`}>
+                <span className={`font-semibold ${availableCredits >= creditCost ? 'text-accent' : 'text-destructive'}`}>
                   {availableCredits}
                 </span>
               </div>
             )}
-
-            {/* Insufficient credits warning with Get Credits button */}
-            {remaining !== 'locked' && typeof remaining === 'number' && remaining === 0 && availableCredits < creditCost && (
-              <div className="flex flex-col gap-2 px-3 py-2 bg-amber-500/10 rounded-lg border border-amber-500/30">
+            
+            {/* Insufficient credits warning with Get Credits button - show for veteran always or when quota exhausted */}
+            {remaining !== 'locked' && typeof remaining === 'number' && (remaining === 0 || level === 'veteran') && availableCredits < creditCost && (
+              <div className="flex flex-col gap-2 px-3 py-2 bg-warning/10 rounded-lg border border-warning/30">
                 <div className="flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-amber-400 flex-shrink-0" />
-                  <span className="text-xs text-amber-400">
+                  <AlertCircle className="h-4 w-4 text-warning flex-shrink-0" />
+                  <span className="text-xs text-warning">
                     Need {creditCost - availableCredits} more credit{creditCost - availableCredits > 1 ? 's' : ''} to generate
                   </span>
                 </div>
-                <Link
-                  to="/pricing"
-                  className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md text-xs font-medium transition-colors"
+                <Button
+                  onClick={() => setShowCreditPackModal(true)}
+                  size="sm"
+                  className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-medium"
                 >
                   <Coins className="h-3 w-3" />
                   Get More Credits
-                </Link>
+                </Button>
               </div>
             )}
           </div>
@@ -368,9 +372,9 @@ export const QuotaLevelCard = ({
                   </TooltipContent>
                 </Tooltip>
               </div>
-              <Select
-                value={projectType}
-                onValueChange={setProjectType}
+              <Select 
+                value={projectType} 
+                onValueChange={setProjectType} 
                 disabled={isLocked || generating || !industry}
               >
                 <SelectTrigger id={`${level}-type`} className="bg-muted/50 border-border/30">
@@ -400,7 +404,7 @@ export const QuotaLevelCard = ({
               Estimated time: {level === 'beginner' ? '5-10' : level === 'intermediate' ? '10-20' : '20-30'} minutes
             </p>
 
-            <Button
+            <Button 
               onClick={handleGenerate}
               disabled={!canGenerateNow}
               className="w-full bg-primary hover:bg-primary/90"
@@ -437,6 +441,12 @@ export const QuotaLevelCard = ({
           </div>
         )}
       </Card>
+
+      {/* Credit Pack Modal - opens directly when user needs credits */}
+      <CreditPackModal 
+        open={showCreditPackModal} 
+        onOpenChange={setShowCreditPackModal}
+      />
     </motion.div>
   );
 };

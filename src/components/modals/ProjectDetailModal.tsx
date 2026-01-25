@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Coins } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { CreditPackModal } from '@/components/modals/CreditPackModal';
 
 interface ProjectDetailModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export const ProjectDetailModal = ({ isOpen, onClose, retryData }: ProjectDetail
   const { quotaData, getQuotaStatus, getResetDate } = useQuotaManagement();
   const [generatingLevel, setGeneratingLevel] = useState<LevelType | null>(null);
   const [quotaExceededLevel, setQuotaExceededLevel] = useState<LevelType | null>(null);
+  const [showCreditPackModal, setShowCreditPackModal] = useState(false);
 
   // Get retry data from location state or props
   const locationState = location.state as { level?: string; projectType?: string; industry?: string } | null;
@@ -250,12 +252,25 @@ export const ProjectDetailModal = ({ isOpen, onClose, retryData }: ProjectDetail
           </DialogHeader>
           <div className="flex gap-2 mt-4">
             <Button variant="outline" onClick={() => setQuotaExceededLevel(null)} className="flex-1">Close</Button>
-            <Button className="flex-1 bg-gradient-primary" asChild>
-              <Link to="/pricing">Get More Credits</Link>
+            <Button
+              className="flex-1 bg-gradient-primary"
+              onClick={() => {
+                setQuotaExceededLevel(null);
+                setShowCreditPackModal(true);
+              }}
+            >
+              <Coins className="h-4 w-4 mr-2" />
+              Get More Credits
             </Button>
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Credit Pack Modal - opens directly when user needs credits */}
+      <CreditPackModal
+        open={showCreditPackModal}
+        onOpenChange={setShowCreditPackModal}
+      />
     </>
   );
 };

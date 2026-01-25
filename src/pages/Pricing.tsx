@@ -9,6 +9,17 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 const plans = [
   {
     name: 'Free',
@@ -65,8 +76,9 @@ export default function Pricing() {
   const { initiatePayment, loading: paymentLoading, verifying } = useRazorpay();
   const [currentPlan, setCurrentPlan] = useState<string>('free');
   const [loadingPlan, setLoadingPlan] = useState(true);
+  const [showDowngradeDialog, setShowDowngradeDialog] = useState(false);
+  const [downgrading, setDowngrading] = useState(false);
 
-  // Fetch current user plan
   useEffect(() => {
     const fetchPlan = async () => {
       if (!user) {
@@ -93,6 +105,33 @@ export default function Pricing() {
     fetchPlan();
   }, [user]);
 
+  const handleDowngrade = async () => {
+    if (!user) return;
+    setDowngrading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await fetch(
+        `https://avsuyudchzyoyakxotfm.supabase.co/functions/v1/downgrade-to-free`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
+        }
+      );
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+      toast.success('Downgraded to Free plan');
+      setCurrentPlan('free');
+      setShowDowngradeDialog(false);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to downgrade');
+    } finally {
+      setDowngrading(false);
+    }
+  };
+
   const handleUpgrade = async (planName: string) => {
     if (!user) {
       toast.error('Please sign in to upgrade');
@@ -101,7 +140,11 @@ export default function Pricing() {
     }
 
     if (planName === 'Free') {
-      toast.info('You are already on the Free plan');
+      if (currentPlan === 'free') {
+        toast.info('You are already on the Free plan');
+      } else {
+        setShowDowngradeDialog(true);
+      }
       return;
     }
 
@@ -115,18 +158,18 @@ export default function Pricing() {
 
   const getButtonText = (planName: string) => {
     if (loadingPlan) return 'Loading...';
-    
+
     if (planName === 'Free') {
       return currentPlan === 'free' ? 'Current Plan' : 'Downgrade';
     }
-    
+
     if (planName === 'Pro') {
       if (currentPlan === 'pro' || currentPlan === 'proplus') {
         return 'Current Plan';
       }
       return 'Upgrade to Pro';
     }
-    
+
     return 'Contact Us';
   };
 
@@ -139,7 +182,7 @@ export default function Pricing() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-6 sm:py-12 lg:py-20">
+    <div className="min-h-screen py-6 sm:py-12 lg:py-20">
       <div className="container mx-auto px-4">
         {/* Close/Back buttons */}
         <div className="flex items-center justify-between mb-6 sm:mb-8 max-w-6xl mx-auto">
@@ -162,7 +205,7 @@ export default function Pricing() {
             <X className="h-4 w-4" />
           </Button>
         </div>
-        
+
         <div className="text-center mb-8 sm:mb-12 lg:mb-16">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-3 sm:mb-4">
             Simple, Transparent Pricing
@@ -181,11 +224,10 @@ export default function Pricing() {
               transition={{ delay: index * 0.1 }}
               className="flex"
             >
-              <Card className={`glass-card flex flex-col w-full relative ${
-                plan.highlighted 
-                  ? 'border-primary shadow-glow ring-2 ring-primary/20' 
+              <Card className={`glass-card flex flex-col w-full relative ${plan.highlighted
+                  ? 'border-primary shadow-glow ring-2 ring-primary/20'
                   : 'border-border/30'
-              }`}>
+                }`}>
                 {plan.highlighted && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                     <Badge className="bg-gradient-primary text-primary-foreground px-3 py-1 text-xs font-semibold">
@@ -193,16 +235,14 @@ export default function Pricing() {
                     </Badge>
                   </div>
                 )}
-                
+
                 <CardHeader className="text-center pb-4 pt-6 sm:pt-8">
-                  <div className={`w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 rounded-xl flex items-center justify-center ${
-                    plan.highlighted ? 'bg-gradient-primary' : 'bg-muted'
-                  }`}>
-                    <plan.icon className={`h-6 w-6 sm:h-7 sm:w-7 ${
-                      plan.highlighted ? 'text-primary-foreground' : 'text-foreground'
-                    }`} />
+                  <div className={`w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 rounded-xl flex items-center justify-center ${plan.highlighted ? 'bg-gradient-primary' : 'bg-muted'
+                    }`}>
+                    <plan.icon className={`h-6 w-6 sm:h-7 sm:w-7 ${plan.highlighted ? 'text-primary-foreground' : 'text-foreground'
+                      }`} />
                   </div>
-                  
+
                   <CardTitle className="text-xl sm:text-2xl text-foreground">{plan.name}</CardTitle>
                   <CardDescription className="text-muted-foreground text-sm">{plan.description}</CardDescription>
                   <div className="mt-3 sm:mt-4">
@@ -210,10 +250,10 @@ export default function Pricing() {
                     <span className="text-muted-foreground text-sm">/month</span>
                   </div>
                 </CardHeader>
-                
+
                 <CardContent className="flex-1 flex flex-col">
                   {plan.isContact ? (
-                    <Button 
+                    <Button
                       className="w-full mb-4 sm:mb-6"
                       variant="outline"
                       asChild
@@ -224,12 +264,11 @@ export default function Pricing() {
                       </a>
                     </Button>
                   ) : (
-                    <Button 
-                      className={`w-full mb-4 sm:mb-6 ${
-                        plan.highlighted 
-                          ? 'bg-gradient-primary hover:opacity-90' 
+                    <Button
+                      className={`w-full mb-4 sm:mb-6 ${plan.highlighted
+                          ? 'bg-gradient-primary hover:opacity-90'
                           : ''
-                      }`}
+                        }`}
                       variant={plan.highlighted ? 'default' : 'outline'}
                       disabled={isButtonDisabled(plan.name)}
                       onClick={() => handleUpgrade(plan.name)}
@@ -244,7 +283,7 @@ export default function Pricing() {
                       )}
                     </Button>
                   )}
-                  
+
                   <ul className="space-y-2 sm:space-y-3 flex-1">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex items-start">
@@ -259,12 +298,38 @@ export default function Pricing() {
           ))}
         </div>
 
-        <div className="mt-10 sm:mt-12 lg:mt-16 text-center">
+
+        <div className="mt-8 text-center">
           <p className="text-muted-foreground text-sm sm:text-base">
             All plans include 14-day money-back guarantee • No credit card required for free plan
           </p>
         </div>
       </div>
+
+      {/* Downgrade Confirmation Dialog */}
+      <AlertDialog open={showDowngradeDialog} onOpenChange={setShowDowngradeDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Downgrade to Free Plan?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>Are you sure you want to downgrade to the Free plan?</p>
+              <ul className="list-disc list-inside text-sm mt-2 space-y-1">
+                <li>You will lose access to Pro features immediately</li>
+                <li>Veteran level projects will be locked</li>
+                <li>Your purchased credits will remain usable</li>
+                <li>No refunds will be provided</li>
+              </ul>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={downgrading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDowngrade} disabled={downgrading} className="bg-destructive hover:bg-destructive/90">
+              {downgrading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Confirm Downgrade
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

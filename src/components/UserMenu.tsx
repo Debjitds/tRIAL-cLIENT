@@ -27,6 +27,7 @@ import {
   History,
   Bell,
   HelpCircle,
+  Video,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -197,6 +198,10 @@ const UserMenu = ({ onReferClick }: UserMenuProps) => {
     navigate('/history');
   };
 
+  const handleRewards = () => {
+    navigate('/rewards');
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
@@ -302,6 +307,11 @@ const UserMenu = ({ onReferClick }: UserMenuProps) => {
         <DropdownMenuItem onClick={handleHistory} className="cursor-pointer">
           <History className="mr-2 h-4 w-4" />
           <span>History</span>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onClick={handleRewards} className="cursor-pointer">
+          <Video className="mr-2 h-4 w-4" />
+          <span>Rewards</span>
         </DropdownMenuItem>
 
         <DropdownMenuItem onClick={handleNotifications} className="cursor-pointer">

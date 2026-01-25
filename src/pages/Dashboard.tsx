@@ -1,21 +1,21 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Zap,
-  Plus,
-  BarChart3,
-  Clock,
-  Star,
+import { 
+  Zap, 
+  Plus, 
+  BarChart3, 
+  Clock, 
+  Star, 
   ArrowRight,
   Folder,
   Users,
   TrendingUp
 } from "lucide-react";
 import { AdSlot } from "@/components/AdSlot";
+import { AdRewardHistory } from "@/components/dashboard/AdRewardHistory";
 import { Helmet } from "react-helmet";
 import { useQuotaManagement } from "@/hooks/useQuotaManagement";
-
 
 const Dashboard = () => {
   const { quotaData, getQuotaStatus, getResetDate } = useQuotaManagement();
@@ -77,11 +77,11 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div className="min-h-screen bg-background">
       <Helmet>
         <title>tRIAL - cLIENTS — Dashboard</title>
       </Helmet>
-
+      
       {/* Header */}
       <header className="border-b border-border bg-surface">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -174,8 +174,8 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {recentProjects.map((project, index) => (
-                <div
-                  key={index}
+                <div 
+                  key={index} 
                   className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-surface-hover transition-colors cursor-pointer"
                 >
                   <div className="flex-1">
@@ -184,10 +184,10 @@ const Dashboard = () => {
                       <Badge variant="outline" className="text-xs">
                         {project.type}
                       </Badge>
-                      <Badge
+                      <Badge 
                         variant={
-                          project.status === 'Deployed' ? 'default' :
-                            project.status === 'Draft' ? 'secondary' : 'outline'
+                          project.status === 'Deployed' ? 'default' : 
+                          project.status === 'Draft' ? 'secondary' : 'outline'
                         }
                         className="text-xs"
                       >
@@ -239,6 +239,9 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
+            {/* Ad Reward History */}
+            <AdRewardHistory />
+            
             {/* Dashboard Ad Rail (desktop) */}
             <div className="hidden lg:block">
               <AdSlot slot="dashboard-rail" />

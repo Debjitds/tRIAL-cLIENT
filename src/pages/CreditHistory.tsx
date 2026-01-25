@@ -19,10 +19,12 @@ import {
   ChevronRight,
   Clock,
   ArrowLeft,
-  X
+  X,
+  Coins
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { CreditPackModal } from '@/components/modals/CreditPackModal';
 
 interface CreditTransaction {
   id: string;
@@ -54,6 +56,7 @@ const CreditHistory = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [showCreditPackModal, setShowCreditPackModal] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -224,9 +227,10 @@ const CreditHistory = () => {
                 <p className="text-muted-foreground mb-4">
                   Your credit history will appear here once you start using the platform.
                 </p>
-                <Link to="/pricing">
-                  <Button>Get Credits</Button>
-                </Link>
+                <Button onClick={() => setShowCreditPackModal(true)}>
+                  <Coins className="h-4 w-4 mr-2" />
+                  Get Credits
+                </Button>
               </div>
             ) : (
               <>
@@ -298,6 +302,13 @@ const CreditHistory = () => {
           </CardContent>
         </Card>
       </main>
+
+      {/* Credit Pack Modal */}
+      <CreditPackModal
+        open={showCreditPackModal}
+        onOpenChange={setShowCreditPackModal}
+        onSuccess={() => fetchTransactions()}
+      />
     </div>
   );
 };

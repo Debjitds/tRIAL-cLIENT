@@ -17,11 +17,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+// Routes that should show the dashboard-style navbar (user menu, notifications, etc.)
+const DASHBOARD_ROUTES = ['/dashboard', '/rewards', '/history', '/credits/history', '/account/profile', '/pricing', '/help', '/notifications'];
+
 const Navbar = () => {
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const isDashboard = location.pathname === '/dashboard';
+  const isDashboardRoute = DASHBOARD_ROUTES.some(route => location.pathname.startsWith(route));
   const [referralModalOpen, setReferralModalOpen] = useState(false);
   const { unreadCount } = useNotifications();
 
@@ -55,7 +58,7 @@ const Navbar = () => {
           </div>
 
           {/* Navigation Links - Hidden on mobile and dashboard */}
-          {!isDashboard && (
+          {!isDashboardRoute && (
             <div className="hidden lg:flex items-center space-x-8">
               <a 
                 href="#features" 
@@ -92,7 +95,7 @@ const Navbar = () => {
 
           {/* CTA Buttons */}
           <div className="flex items-center space-x-2 sm:space-x-3">
-            {user && isDashboard ? (
+            {user && isDashboardRoute ? (
               // Show notifications bell and user menu when authenticated and on dashboard
               <div className="flex items-center gap-1 sm:gap-2">
                 <NotificationsPanel>

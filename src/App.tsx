@@ -7,9 +7,10 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AdminProtectedRoute } from "./components/auth/AdminProtectedRoute";
 import { MaintenanceGuard } from "./components/auth/MaintenanceGuard";
+import ScrollToTop from "./components/ScrollToTop";
+import MainLayout from "./layouts/MainLayout";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import NonAdminLayout from "./components/layout/NonAdminLayout";
 import Auth from "./pages/Auth";
 import UserLogin from "./pages/UserLogin";
 import AdminLogin from "./pages/AdminLogin";
@@ -24,11 +25,14 @@ import Profile from "./pages/Profile";
 import Help from "./pages/Help";
 import Notifications from "./pages/Notifications";
 import Blog from "./pages/Blog";
-import Sitemap from "./pages/Sitemap";
 import About from "./pages/About";
 import Support from "./pages/Support";
 import Contact from "./pages/Contact";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Security from "./pages/Security";
 import CreditHistory from "./pages/CreditHistory";
+import Rewards from "./pages/Rewards";
 import { ForbiddenPage, ServerErrorPage, MaintenancePage } from "./pages/ErrorPages";
 
 const queryClient = new QueryClient();
@@ -39,13 +43,12 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <MaintenanceGuard>
+            <ScrollToTop />
             <Toaster />
             <Sonner />
             <Routes>
-              <Route path="/" element={<Index />} />
-              
-              {/* Wraps all non-admin pages with the dynamic background */}
-              <Route element={<NonAdminLayout />}>
+              <Route element={<MainLayout />}>
+                <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/login/user" element={<UserLogin />} />
                 <Route path="/login/admin" element={<AdminLogin />} />
@@ -55,6 +58,7 @@ const App = () => (
                 <Route path="/projects/:id" element={<ProtectedRoute><ProjectWorkspace /></ProtectedRoute>} />
                 <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
                 <Route path="/credits/history" element={<ProtectedRoute><CreditHistory /></ProtectedRoute>} />
+                <Route path="/rewards" element={<ProtectedRoute><Rewards /></ProtectedRoute>} />
                 <Route path="/account/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
                 <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
@@ -62,21 +66,23 @@ const App = () => (
                 <Route path="/about" element={<About />} />
                 <Route path="/support" element={<Support />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/security" element={<Security />} />
                 <Route path="/403" element={<ForbiddenPage />} />
                 <Route path="/500" element={<ServerErrorPage />} />
                 <Route path="/maintenance" element={<MaintenancePage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Route>
-
-              <Route path="/sitemap.xml" element={<Sitemap />} />
+              {/* Admin routes are excluded from MainLayout to prevent animation on them */}
               <Route path="/admin/*" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
             </Routes>
           </MaintenanceGuard>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
-  </QueryClientProvider>
+  </QueryClientProvider >
 );
 
 export default App;

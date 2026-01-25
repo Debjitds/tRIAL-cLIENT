@@ -1,12 +1,11 @@
-import Navbar from "@/components/navbar";
 import { Link } from "react-router-dom";
+import Navbar from "@/components/navbar";
 import Hero from "@/components/hero";
 import Features from "@/components/features";
 import Testimonials from "@/components/testimonials";
 import Pricing from "@/components/pricing";
 import { AdSlot } from "@/components/AdSlot";
 import { Helmet } from "react-helmet";
-import { GlobalBackground } from '@/components/GlobalBackground';
 
 const Index = () => {
   const structuredData = {
@@ -54,71 +53,69 @@ const Index = () => {
   };
 
   return (
-    <GlobalBackground>
-      <div className="min-h-screen">
-        <Helmet>
-          <script type="application/ld+json">
-            {JSON.stringify(structuredData)}
-          </script>
-        </Helmet>
-
-        <Navbar />
-        <Hero />
-        <Features />
-        <Testimonials />
-        <Pricing />
-
-        {/* Footer */}
-        <footer className="bg-surface border-t border-border py-10 sm:py-16">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
-              <div className="col-span-2">
-                <div className="flex items-center space-x-2 mb-4">
-                  <img src="/favicon.png" alt="tRIAL - cLIENTS logo" className="h-8 w-8 sm:h-10 sm:w-10" />
-                  <span className="font-display font-bold text-lg sm:text-xl text-gradient">
-                    tRIAL - cLIENTS
-                  </span>
-                </div>
-                <p className="text-sm sm:text-base text-foreground-secondary max-w-md">
-                  Generate realistic client briefs and practice projects with AI. Free beginner briefs — upgrade for intermediate & veteran briefs.
-                </p>
+    <div className="min-h-screen">
+      <Helmet>
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
+      </Helmet>
+      
+      <Navbar />
+      <Hero />
+      <Features />
+      <Testimonials />
+      <Pricing />
+      
+      {/* Footer */}
+      <footer className="bg-surface border-t border-border py-10 sm:py-16">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+            <div className="col-span-2">
+              <div className="flex items-center space-x-2 mb-4">
+                <img src="/favicon.png" alt="tRIAL - cLIENTS logo" className="h-8 w-8 sm:h-10 sm:w-10" />
+                <span className="font-display font-bold text-lg sm:text-xl text-gradient">
+                  tRIAL - cLIENTS
+                </span>
               </div>
-
-              <div>
-                <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Product</h3>
-                <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-foreground-secondary">
-                  <li><a href="#features" className="hover:text-foreground">Features</a></li>
-                  <li><a href="#pricing" className="hover:text-foreground">Pricing</a></li>
-                  <li><a href="#" className="hover:text-foreground">Templates</a></li>
-                  <li><a href="#" className="hover:text-foreground">API</a></li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Company</h3>
-                <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-foreground-secondary">
-                  <li><Link to="/about" className="hover:text-foreground">About</Link></li>
-                  <li><Link to="/blog" className="hover:text-foreground">Blog</Link></li>
-                  <li><Link to="/support" className="hover:text-foreground">Support</Link></li>
-                  <li><Link to="/contact" className="hover:text-foreground">Contact</Link></li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="border-t border-border mt-8 sm:mt-12 pt-6 sm:pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-              <p className="text-xs sm:text-sm text-foreground-secondary text-center sm:text-left">
-                © 2025-26 tRIAL - cLIENTS. All rights reserved.
+              <p className="text-sm sm:text-base text-foreground-secondary max-w-md">
+                Generate realistic client briefs and practice projects with AI. Free beginner briefs — upgrade for intermediate & veteran briefs.
               </p>
-              <div className="flex space-x-4 sm:space-x-6">
-                <a href="#" className="text-xs sm:text-sm text-foreground-secondary hover:text-foreground">Privacy</a>
-                <a href="#" className="text-xs sm:text-sm text-foreground-secondary hover:text-foreground">Terms</a>
-                <a href="#" className="text-xs sm:text-sm text-foreground-secondary hover:text-foreground">Security</a>
-              </div>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Product</h3>
+              <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-foreground-secondary">
+                <li><a href="#features" className="hover:text-foreground">Features</a></li>
+                <li><a href="#pricing" className="hover:text-foreground">Pricing</a></li>
+                <li><a href="#" className="hover:text-foreground">Templates</a></li>
+                <li><a href="#" className="hover:text-foreground">API</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Company</h3>
+              <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-foreground-secondary">
+                <li><Link to="/about" className="hover:text-foreground">About</Link></li>
+                <li><Link to="/blog" className="hover:text-foreground">Blog</Link></li>
+                <li><Link to="/support" className="hover:text-foreground">Support</Link></li>
+                <li><Link to="/contact" className="hover:text-foreground">Contact</Link></li>
+              </ul>
             </div>
           </div>
-        </footer>
-      </div>
-    </GlobalBackground>
+          
+          <div className="border-t border-border mt-8 sm:mt-12 pt-6 sm:pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p className="text-xs sm:text-sm text-foreground-secondary text-center sm:text-left">
+              © 2025-26 tRIAL - cLIENTS. All rights reserved.
+            </p>
+            <div className="flex space-x-4 sm:space-x-6">
+              <Link to="/privacy" className="text-xs sm:text-sm text-foreground-secondary hover:text-foreground">Privacy</Link>
+              <Link to="/terms" className="text-xs sm:text-sm text-foreground-secondary hover:text-foreground">Terms</Link>
+              <Link to="/security" className="text-xs sm:text-sm text-foreground-secondary hover:text-foreground">Security</Link>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 };
 

@@ -1,14 +1,27 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
+# robots.txt for tRIAL-CLIENTS
 
 User-agent: *
 Allow: /
+Allow: /about
+Allow: /blog
+Allow: /support
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+Allow: /security
+
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /history
+Disallow: /projects/
+Disallow: /credits/
+Disallow: /account/
+Disallow: /help
+Disallow: /notifications
+Disallow: /onboarding
+Disallow: /login/
+Disallow: /403
+Disallow: /500
+Disallow: /maintenance
+
+Sitemap: https://trial-clients.vercel.app/sitemap.xml

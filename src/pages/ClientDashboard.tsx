@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/navbar';
-
 import DashboardCards from '@/components/dashboard/DashboardCards';
 import RecentProjectsList from '@/components/dashboard/RecentProjectsList';
 import QuickActions from '@/components/dashboard/QuickActions';
@@ -17,6 +16,7 @@ interface RetryState {
   level?: string;
   projectType?: string;
   industry?: string;
+  scrollTo?: string;
 }
 
 const ClientDashboard = () => {
@@ -32,12 +32,27 @@ const ClientDashboard = () => {
     }
   }, [user, loading, navigate]);
 
-  // Handle retry generation from 500 error page
+  // Handle route state actions (retry generation from 500 page, scroll to sections, etc.)
   useEffect(() => {
     const state = location.state as RetryState | null;
-    if (state?.retryGeneration) {
+    if (!state) return;
+
+    if (state.retryGeneration) {
       setRetryData(state);
       setShowRetryModal(true);
+    }
+
+    if (state.scrollTo) {
+      // Wait for layout before scrolling
+      requestAnimationFrame(() => {
+        document.getElementById(state.scrollTo!)?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      });
+    }
+
+    if (state.retryGeneration || state.scrollTo) {
       // Clear the state to prevent re-triggering on navigation
       navigate(location.pathname, { replace: true, state: {} });
     }
@@ -56,7 +71,7 @@ const ClientDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div className="min-h-screen">
       <Navbar />
 
       {/* Main content */}
