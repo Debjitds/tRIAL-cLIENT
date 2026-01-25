@@ -33,7 +33,7 @@ const Pricing = () => {
       badge: "Most Popular",
       features: [
         "Access all project levels",
-        "15 credits per month",
+        "15 credits",
         "Priority Support",
         "Everything in Free"
       ],
@@ -81,11 +81,10 @@ const Pricing = () => {
         {/* Pricing cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
           {plans.map((plan, index) => (
-            <Card 
+            <Card
               key={index}
-              className={`glass-card hover-lift border-border/20 relative flex flex-col ${
-                plan.popular ? 'border-primary/50 ring-2 ring-primary/20 scale-[1.02]' : ''
-              } animate-fade-in`}
+              className={`glass-card hover-lift border-border/20 relative flex flex-col ${plan.popular ? 'border-primary/50 ring-2 ring-primary/20 scale-[1.02]' : ''
+                } animate-fade-in`}
               style={{ animationDelay: `${index * 150}ms` }}
             >
               {plan.badge && (
@@ -95,21 +94,19 @@ const Pricing = () => {
                   </Badge>
                 </div>
               )}
-              
+
               <CardHeader className="text-center pb-6 pt-8">
-                <div className={`w-14 h-14 mx-auto mb-4 rounded-xl flex items-center justify-center ${
-                  plan.popular ? 'bg-gradient-primary' : 'bg-muted'
-                }`}>
-                  <plan.icon className={`h-7 w-7 ${
-                    plan.popular ? 'text-primary-foreground' : 'text-foreground'
-                  }`} />
+                <div className={`w-14 h-14 mx-auto mb-4 rounded-xl flex items-center justify-center ${plan.popular ? 'bg-gradient-primary' : 'bg-muted'
+                  }`}>
+                  <plan.icon className={`h-7 w-7 ${plan.popular ? 'text-primary-foreground' : 'text-foreground'
+                    }`} />
                 </div>
-                
+
                 <CardTitle className="text-xl sm:text-2xl font-display">{plan.name}</CardTitle>
                 <CardDescription className="text-sm sm:text-base">
                   {plan.description}
                 </CardDescription>
-                
+
                 <div className="mt-4">
                   <div className="flex items-baseline justify-center space-x-1">
                     <span className="text-3xl sm:text-4xl font-bold">{plan.price}</span>
@@ -147,11 +144,10 @@ const Pricing = () => {
                 ) : (
                   <Button
                     size="lg"
-                    className={`w-full ${
-                      plan.popular 
-                        ? 'bg-gradient-primary hover-glow' 
+                    className={`w-full ${plan.popular
+                        ? 'bg-gradient-primary hover-glow'
                         : 'bg-secondary hover:bg-secondary/80'
-                    }`}
+                      }`}
                     asChild
                   >
                     <Link to={plan.ctaLink} className="flex items-center justify-center space-x-2">

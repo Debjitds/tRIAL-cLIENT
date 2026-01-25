@@ -43,7 +43,7 @@ const plans = [
     icon: Crown,
     features: [
       'Access all project levels',
-      '15 credits per month',
+      '15 credits',
       'Priority Support',
       'Everything in Free'
     ],
@@ -225,8 +225,8 @@ export default function Pricing() {
               className="flex"
             >
               <Card className={`glass-card flex flex-col w-full relative ${plan.highlighted
-                  ? 'border-primary shadow-glow ring-2 ring-primary/20'
-                  : 'border-border/30'
+                ? 'border-primary shadow-glow ring-2 ring-primary/20'
+                : 'border-border/30'
                 }`}>
                 {plan.highlighted && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -266,8 +266,8 @@ export default function Pricing() {
                   ) : (
                     <Button
                       className={`w-full mb-4 sm:mb-6 ${plan.highlighted
-                          ? 'bg-gradient-primary hover:opacity-90'
-                          : ''
+                        ? 'bg-gradient-primary hover:opacity-90'
+                        : ''
                         }`}
                       variant={plan.highlighted ? 'default' : 'outline'}
                       disabled={isButtonDisabled(plan.name)}
