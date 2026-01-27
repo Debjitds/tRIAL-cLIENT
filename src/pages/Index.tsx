@@ -59,13 +59,13 @@ const Index = () => {
           {JSON.stringify(structuredData)}
         </script>
       </Helmet>
-      
+
       <Navbar />
       <Hero />
       <Features />
       <Testimonials />
       <Pricing />
-      
+
       {/* Footer */}
       <footer className="bg-surface border-t border-border py-10 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -81,7 +81,7 @@ const Index = () => {
                 Generate realistic client briefs and practice projects with AI. Free beginner briefs — upgrade for intermediate & veteran briefs.
               </p>
             </div>
-            
+
             <div>
               <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Product</h3>
               <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-foreground-secondary">
@@ -91,7 +91,7 @@ const Index = () => {
                 <li><a href="#" className="hover:text-foreground">API</a></li>
               </ul>
             </div>
-            
+
             <div>
               <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Company</h3>
               <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-foreground-secondary">
@@ -102,10 +102,10 @@ const Index = () => {
               </ul>
             </div>
           </div>
-          
+
           <div className="border-t border-border mt-8 sm:mt-12 pt-6 sm:pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-xs sm:text-sm text-foreground-secondary text-center sm:text-left">
-              © 2025-26 tRIAL - cLIENTS. All rights reserved.
+              © 2026 tRIAL - cLIENTS. All rights reserved.
             </p>
             <div className="flex space-x-4 sm:space-x-6">
               <Link to="/privacy" className="text-xs sm:text-sm text-foreground-secondary hover:text-foreground">Privacy</Link>
