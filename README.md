@@ -30,7 +30,14 @@ This platform uses advanced AI to generate **realistic client briefs** that simu
 ![Desktop Landing Page](public/landing.png)
 
 ### Mobile Experience
-![Mobile Dashboard](public/screenshots/mobiledashboard.png)
+<table>
+  <tr>
+    <td width="25%"><img src="public/screenshots/mobilelanding.png" alt="Mobile Landing" width="100%" /></td>
+    <td width="25%"><img src="public/screenshots/mobiledashboard.png" alt="Mobile Dashboard" width="100%" /></td>
+    <td width="25%"><img src="public/screenshots/mobiledashboardd.png" alt="Mobile Dashboard Dark" width="100%" /></td>
+    <td width="25%"><img src="public/screenshots/mobilehelp.png" alt="Mobile Help" width="100%" /></td>
+  </tr>
+</table>
 
 ---
 
