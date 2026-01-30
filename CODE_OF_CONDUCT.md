@@ -56,6 +56,6 @@ Project maintainers will follow these Community Impact Guidelines in determining
 
 If you are subject to or witness unacceptable behavior, or have any other concerns, please notify the community owners immediately.
 
-*   **Email**: `conduct@[project-domain].com` (Replace with actual contact)
+*   **Email**: ` help.trialclients@gmail.com`
 
 All reports will be kept confidential. We will investigate every report and take appropriate action.
