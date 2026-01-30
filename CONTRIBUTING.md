@@ -20,8 +20,8 @@ Ensure you have the following installed:
 ### Local Development Setup
 1.  **Clone the Repository**
     ```bash
-    git clone https://github.com/[org]/[repo].git
-    cd [repo]
+    git clone https://github.com/Debjitds/tRIAL-cLIENT.git
+    cd tRIAL-cLIENT
     ```
 2.  **Install Dependencies**
     ```bash
