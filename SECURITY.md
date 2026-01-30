@@ -7,7 +7,7 @@ We are dedicated to maintaining the security and integrity of our user data and 
 We strongly encourage the reporting of security issues. If you believe you have found a vulnerability, please report it to us immediately.
 
 ### **Contact Information**
-*   **Primary Contact**: `security@[project-domain].com` (Replace with actual contact)
+*   **Primary Contact**: ` help.trialclients@gmail.com` 
 *   **PGP Key**: (Optional: Insert Key ID here if available)
 *   **Platform**: GitHub Security Advisories (Private Reporting)
 
