@@ -43,7 +43,7 @@ export const SocialRewardCard = () => {
   const [postUrl, setPostUrl] = useState('');
 
   // Backend cooldown state
-  const { cooldown, refetch: refetchCooldown } = useSocialCooldown();
+  const { loading: cooldownLoading, cooldown, refetch: refetchCooldown } = useSocialCooldown();
 
   useEffect(() => {
     if (user) {
@@ -144,7 +144,12 @@ export const SocialRewardCard = () => {
     }
   };
 
-  if (loading) {
+  // Determine UI state based on backend cooldown (single source of truth)
+  const canSubmit = cooldown?.allowed === true;
+  const hasPendingRequest = existingRequest?.status === 'pending';
+  const isInCooldown = cooldown && !cooldown.allowed && cooldown.ms_remaining !== null && cooldown.ms_remaining > 0;
+
+  if (loading || cooldownLoading) {
     return (
       <Card>
         <CardContent className="p-6">
@@ -160,7 +165,7 @@ export const SocialRewardCard = () => {
   }
 
   // Show existing pending request status
-  if (existingRequest && existingRequest.status === 'pending') {
+  if (hasPendingRequest && existingRequest) {
     return (
       <Card>
         <CardHeader className="pb-3">
@@ -196,8 +201,8 @@ export const SocialRewardCard = () => {
     );
   }
 
-  // Show weekly limit message if not allowed (backend-enforced)
-  if (cooldown && !cooldown.allowed) {
+  // Show cooldown state (not allowed, has remaining time)
+  if (isInCooldown && cooldown) {
     return (
       <Card>
         <CardHeader className="pb-3">
@@ -208,8 +213,8 @@ export const SocialRewardCard = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="p-4 bg-muted/50 rounded-lg space-y-3">
-            {/* Backend-driven cooldown box */}
-            <SocialRewardCooldown cooldown={cooldown} />
+            {/* Backend-driven cooldown box - refetch when countdown expires */}
+            <SocialRewardCooldown cooldown={cooldown} onCooldownExpired={refetchCooldown} />
 
             {existingRequest && existingRequest.status === 'approved' && (
               <div className="flex items-center gap-2 text-green-600 bg-green-500/10 p-2 rounded">
@@ -230,7 +235,27 @@ export const SocialRewardCard = () => {
     );
   }
 
-  // Show submission form
+  // Show "not allowed" but no countdown (e.g., pending request reason from backend)
+  if (cooldown && !cooldown.allowed && !isInCooldown) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Gift className="h-5 w-5 text-primary" />
+            Earn Free Credits
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="p-4 bg-muted/50 rounded-lg space-y-3">
+            <SocialRewardCooldown cooldown={cooldown} onCooldownExpired={refetchCooldown} />
+            <p className="text-xs text-muted-foreground">You can submit one social post for review each week.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Show submission form (canSubmit is true OR first-time user with no cooldown data)
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -243,6 +268,17 @@ export const SocialRewardCard = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Show success message if last submission was approved */}
+        {existingRequest?.status === 'approved' && (
+          <div className="p-3 bg-green-500/10 rounded-lg">
+            <div className="flex items-center gap-2 text-green-600">
+              <CheckCircle className="h-4 w-4" />
+              <span className="text-sm font-medium">Previous reward: +{existingRequest.credits_awarded} credits</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">Your cooldown has ended. You can submit a new post!</p>
+          </div>
+        )}
+
         <div className="p-3 bg-muted/50 rounded-lg space-y-2 text-sm">
           <p className="font-medium">How it works:</p>
           <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
@@ -257,11 +293,6 @@ export const SocialRewardCard = () => {
             <p>• Submitting does NOT guarantee credits</p>
           </div>
         </div>
-
-        {/* Backend-driven cooldown (visible if approved but now eligible again) */}
-        {existingRequest?.status === 'approved' && cooldown && cooldown.ms_remaining !== null && (
-          <SocialRewardCooldown cooldown={cooldown} />
-        )}
 
         <div className="space-y-3">
           <div className="space-y-2">

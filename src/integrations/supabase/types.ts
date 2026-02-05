@@ -372,6 +372,8 @@ export type Database = {
           id: string
           intermediate_left: number
           plan: string
+          plan_expires_at: string | null
+          plan_started_at: string | null
           razorpay_payment_id: string | null
           reset_at: string
           updated_at: string
@@ -385,6 +387,8 @@ export type Database = {
           id?: string
           intermediate_left?: number
           plan?: string
+          plan_expires_at?: string | null
+          plan_started_at?: string | null
           razorpay_payment_id?: string | null
           reset_at?: string
           updated_at?: string
@@ -398,6 +402,8 @@ export type Database = {
           id?: string
           intermediate_left?: number
           plan?: string
+          plan_expires_at?: string | null
+          plan_started_at?: string | null
           razorpay_payment_id?: string | null
           reset_at?: string
           updated_at?: string
@@ -656,6 +662,11 @@ export type Database = {
         Args: { _level: string; _user_id: string }
         Returns: Json
       }
+      check_and_expire_plans: { Args: never; Returns: number }
+      check_and_reset_user_quota: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       check_quota_availability: {
         Args: { _level: string; _user_id: string }
         Returns: Json
@@ -667,6 +678,7 @@ export type Database = {
       delete_user_account: { Args: never; Returns: undefined }
       generate_referral_code: { Args: never; Returns: string }
       get_maintenance_mode: { Args: never; Returns: Json }
+      get_plan_expiry_status: { Args: { _user_id: string }; Returns: Json }
       get_social_reward_cooldown: { Args: never; Returns: Json }
       has_role: {
         Args: {

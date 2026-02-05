@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -14,6 +14,10 @@ interface QuotaData {
     veteranLeft: number;
     resetAt: string;
   };
+  // Plan expiry tracking
+  planStartedAt: string | null;
+  planExpiresAt: string | null;
+  isPlanExpired: boolean;
 }
 
 // Credit costs per level (updated: veteran = 5)
@@ -23,11 +27,13 @@ export const CREDIT_COSTS: Record<LevelType, number> = {
   veteran: 5
 };
 
-// Free monthly quotas per plan (updated: beginner = 3 for free plan)
-const PLAN_FREE_QUOTAS: Record<PlanType, { beginner: number; intermediate: number; veteran: number }> = {
-  free: { beginner: 3, intermediate: 2, veteran: 0 },
-  pro: { beginner: 10, intermediate: 5, veteran: 2 },
-  proplus: { beginner: 20, intermediate: 10, veteran: 5 }
+// HARDCODED free monthly quotas - NEVER change based on plan
+// These are the same for ALL users (Free, Pro, ProPlus)
+// Pro plan only provides credits and feature access, NOT increased free quotas
+const HARDCODED_FREE_QUOTAS = {
+  beginner: 3,      // Always 3 free per month
+  intermediate: 2,  // Always 2 free per month
+  veteran: 0        // Always 0 free (credits-only)
 };
 
 export const useQuotaManagement = () => {
@@ -35,11 +41,7 @@ export const useQuotaManagement = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchSubscription();
-  }, []);
-
-  const fetchSubscription = async () => {
+  const fetchSubscription = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -49,7 +51,7 @@ export const useQuotaManagement = () => {
 
       const { data, error } = await supabase
         .from('subscriptions')
-        .select('*')
+        .select('*, plan_started_at, plan_expires_at')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -70,6 +72,10 @@ export const useQuotaManagement = () => {
       }
       
       // Subscription exists, use it
+      // Calculate if plan is expired based on backend timestamp
+      const planExpiresAt = data.plan_expires_at;
+      const isPlanExpired = planExpiresAt ? new Date(planExpiresAt) <= new Date() : false;
+      
       setQuotaData({
         plan: data.plan as PlanType,
         credits: data.credits ?? 0,
@@ -78,7 +84,10 @@ export const useQuotaManagement = () => {
           intermediateLeft: data.intermediate_left,
           veteranLeft: data.veteran_left,
           resetAt: data.reset_at
-        }
+        },
+        planStartedAt: data.plan_started_at || null,
+        planExpiresAt: planExpiresAt || null,
+        isPlanExpired
       });
     } catch (error) {
       if (import.meta.env.DEV) {
@@ -92,7 +101,11 @@ export const useQuotaManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchSubscription();
+  }, [fetchSubscription]);
 
   const getQuotaStatus = (level: LevelType): {
     available: boolean;
@@ -120,12 +133,10 @@ export const useQuotaManagement = () => {
       };
     }
 
-    // CRITICAL: Use the ORIGINAL plan's free quota limits, NOT the current plan
-    // Free quota limits are set at signup based on the FREE plan and never change
-    // Purchasing credits upgrades the plan but should NOT change free quota limits
-    // Free quotas only reset on the monthly cycle
-    const originalFreePlanQuotas = PLAN_FREE_QUOTAS['free'];
-    const limit = originalFreePlanQuotas[level];
+    // CRITICAL: Use HARDCODED free quota limits
+    // These limits NEVER change regardless of subscription plan
+    // Pro plan provides credits and access, NOT increased free quotas
+    const limit = HARDCODED_FREE_QUOTAS[level];
 
     const remaining = quotaData.quotas[`${level}Left` as keyof typeof quotaData.quotas] as number;
     const canUseCredits = quotaData.credits >= creditCost;

@@ -4,6 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 // CORS configuration
 const allowedOrigins = [
   'https://avsuyudchzyoyakxotfm.lovable.app',
+  'https://trial-clients.vercel.app',
   /^https:\/\/.*\.lovable\.app$/,
   /^https:\/\/.*\.lovable\.dev$/,
   'http://localhost:5173',
@@ -84,10 +85,13 @@ serve(async (req) => {
     }
 
     // Downgrade to free plan - KEEP purchased credits intact
+    // Clear plan expiry timestamps since free plan doesn't expire
     const { error: updateError } = await adminSupabase
       .from('subscriptions')
       .update({
         plan: 'free',
+        plan_started_at: null,
+        plan_expires_at: null,
         updated_at: new Date().toISOString()
       })
       .eq('user_id', user.id);

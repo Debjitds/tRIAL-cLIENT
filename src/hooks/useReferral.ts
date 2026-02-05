@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -15,13 +15,7 @@ export function useReferral() {
   const [referralData, setReferralData] = useState<ReferralData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      fetchReferralData();
-    }
-  }, [user]);
-
-  const fetchReferralData = async () => {
+  const fetchReferralData = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -74,7 +68,13 @@ export function useReferral() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchReferralData();
+    }
+  }, [user, fetchReferralData]);
 
   const getReferralLink = () => {
     if (!referralData?.code) return '';

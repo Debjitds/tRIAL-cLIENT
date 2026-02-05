@@ -19,6 +19,7 @@ interface SocialRewardCooldownProps {
   /** Backend response from get_social_reward_cooldown */
   cooldown: SocialCooldownState | null;
   label?: string;
+  onCooldownExpired?: () => void | Promise<void>;
 }
 
 /**
@@ -28,6 +29,7 @@ interface SocialRewardCooldownProps {
 export function SocialRewardCooldown({
   cooldown,
   label = "Next submission available in",
+  onCooldownExpired,
 }: SocialRewardCooldownProps) {
   // Local tick to keep countdown live (only needed when in cooldown)
   const [offset, setOffset] = useState(0);
@@ -44,6 +46,17 @@ export function SocialRewardCooldown({
   useEffect(() => {
     setOffset(0);
   }, [cooldown?.cooldown_end]);
+
+  // Notify parent when cooldown expires
+  useEffect(() => {
+    const msRemaining = cooldown?.ms_remaining;
+    if (msRemaining === null || msRemaining === undefined) return;
+
+    const adjusted = Math.max(0, msRemaining - offset);
+    if (adjusted <= 0 && onCooldownExpired) {
+      void onCooldownExpired();
+    }
+  }, [cooldown?.ms_remaining, offset, onCooldownExpired]);
 
   if (!cooldown) return null;
 
@@ -67,6 +80,8 @@ export function SocialRewardCooldown({
 
   const adjusted = Math.max(0, ms_remaining - offset);
   const eligibleNow = adjusted <= 0;
+  // useEffect moved up from here
+
   const { days, hours, minutes } = getCooldownParts(adjusted);
 
   const eligibleDate = new Date(cooldown_end);

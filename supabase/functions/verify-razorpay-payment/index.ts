@@ -36,7 +36,7 @@ interface VerifyRequest {
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
-
+  
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -56,12 +56,12 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-
+    
     // User client for auth check
     const userSupabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } }
     });
-
+    
     // Admin client for updates
     const adminSupabase = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -164,13 +164,19 @@ serve(async (req) => {
     // DO NOT touch beginner_left, intermediate_left, veteran_left
     // Free quotas reset ONLY on monthly cycle, NOT on purchase
     const newBalance = (existingSub?.credits || 0) + planCredits[plan];
-
+    
+    // Calculate plan expiry: 30 days from now
+    const planStartedAt = new Date().toISOString();
+    const planExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    
     const { error: updateError } = await adminSupabase
       .from('subscriptions')
       .update({
         plan: plan,
         credits: newBalance,
         razorpay_payment_id: razorpay_payment_id, // Store for idempotency
+        plan_started_at: planStartedAt,
+        plan_expires_at: planExpiresAt,
         updated_at: new Date().toISOString()
       })
       .eq('user_id', user.id);
