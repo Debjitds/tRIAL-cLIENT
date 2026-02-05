@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
+import { ExpiringProUsersWidget } from "../widgets/ExpiringProUsersWidget";
 
 interface SystemStats {
   totalUsers: number;
@@ -34,8 +36,9 @@ interface SystemStats {
 interface AuditLog {
   id: string;
   action_type: string;
-  details: any;
+  details: Json | null;
   created_at: string;
+  admin_user_id: string;
   admin_email?: string;
 }
 
@@ -54,7 +57,7 @@ export const AdminOverview = () => {
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     setLoading(true);
     try {
       // Fetch user stats
@@ -109,7 +112,7 @@ export const AdminOverview = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchStats();
@@ -147,7 +150,7 @@ export const AdminOverview = () => {
       supabase.removeChannel(usersChannel);
       supabase.removeChannel(auditChannel);
     };
-  }, []);
+  }, [fetchStats]);
 
   const kpis = [
     {
@@ -341,6 +344,9 @@ export const AdminOverview = () => {
         </Card>
       </div>
 
+      {/* Expiring Pro Users Widget */}
+      <ExpiringProUsersWidget />
+
       {/* Recent Admin Actions */}
       <Card>
         <CardHeader className="pb-4">
@@ -368,7 +374,7 @@ export const AdminOverview = () => {
                       </Badge>
                     </div>
                     <p className="text-sm text-foreground-secondary mb-1">
-                      {log.details?.reason || log.details?.new_status || 'Admin action performed'}
+                      {(log.details as { reason?: string; new_status?: string })?.reason || (log.details as { reason?: string; new_status?: string })?.new_status || 'Admin action performed'}
                     </p>
                     <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
                       <span>By: {log.admin_email}</span>

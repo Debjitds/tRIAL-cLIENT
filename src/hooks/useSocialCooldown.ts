@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -16,6 +16,7 @@ export function useSocialCooldown() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [cooldown, setCooldown] = useState<SocialCooldownState | null>(null);
+  const refreshTimerRef = useRef<number | null>(null);
 
   const fetchCooldown = useCallback(async () => {
     if (!user) {
@@ -36,9 +37,38 @@ export function useSocialCooldown() {
     }
   }, [user]);
 
+  // Initial fetch
   useEffect(() => {
     fetchCooldown();
   }, [fetchCooldown]);
+
+  // Auto-refetch when ms_remaining elapses (server-based timer)
+  useEffect(() => {
+    // Clear any existing timer
+    if (refreshTimerRef.current) {
+      window.clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
+
+    // Only schedule if we have a cooldown with remaining time
+    if (!cooldown || cooldown.allowed || cooldown.ms_remaining === null || cooldown.ms_remaining <= 0) {
+      return;
+    }
+
+    // Schedule refetch when cooldown ends (add 1 second buffer for server timing)
+    const delay = Math.min(cooldown.ms_remaining + 1000, 2147483647); // Cap at max setTimeout value
+    
+    refreshTimerRef.current = window.setTimeout(() => {
+      fetchCooldown();
+    }, delay);
+
+    return () => {
+      if (refreshTimerRef.current) {
+        window.clearTimeout(refreshTimerRef.current);
+        refreshTimerRef.current = null;
+      }
+    };
+  }, [cooldown, fetchCooldown]);
 
   return { loading, cooldown, refetch: fetchCooldown };
 }

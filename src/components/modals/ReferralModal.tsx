@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Share2, Copy, MessageCircle, Check, Gift, Users, Coins, ExternalLink, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useReferral } from '@/hooks/useReferral';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -55,17 +55,10 @@ export const ReferralModal = ({ isOpen, onClose }: ReferralModalProps) => {
   const [postUrl, setPostUrl] = useState('');
   const [showResubmitForm, setShowResubmitForm] = useState(false);
 
-  // Backend cooldown
-  const { cooldown, refetch: refetchCooldown } = useSocialCooldown();
+  // Backend cooldown (auto-refetches when ms_remaining elapses)
+  const { cooldown, loading: cooldownLoading, refetch: refetchCooldown } = useSocialCooldown();
 
-  useEffect(() => {
-    if (user && isOpen) {
-      fetchExistingRequest();
-      refetchCooldown();
-    }
-  }, [user, isOpen]);
-
-  const fetchExistingRequest = async () => {
+  const fetchExistingRequest = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('social_reward_requests')
@@ -82,7 +75,14 @@ export const ReferralModal = ({ isOpen, onClose }: ReferralModalProps) => {
     } finally {
       setSocialLoading(false);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (user && isOpen) {
+      fetchExistingRequest();
+      refetchCooldown();
+    }
+  }, [user, isOpen, fetchExistingRequest, refetchCooldown]);
 
   const handleCopy = async () => {
     await copyReferralLink();
@@ -127,6 +127,10 @@ export const ReferralModal = ({ isOpen, onClose }: ReferralModalProps) => {
         if (error) {
           if (error.message.includes('Invalid URL')) {
             toast.error('Invalid URL. Please submit a valid link from X/Twitter, LinkedIn, Reddit, or YouTube.');
+          } else if (error.message.includes('pending request')) {
+            toast.error('You already have a pending request awaiting review.');
+          } else if (error.message.includes('cooldown')) {
+            toast.error('Your 7-day cooldown has not ended yet. Please wait before submitting.');
           } else {
             throw error;
           }
@@ -138,9 +142,11 @@ export const ReferralModal = ({ isOpen, onClose }: ReferralModalProps) => {
         setPlatform('');
         setPostUrl('');
         fetchExistingRequest();
+        refetchCooldown();
         return;
       }
 
+      // New submission (after cooldown or first-time)
       const { error } = await supabase
         .from('social_reward_requests')
         .insert({
@@ -153,11 +159,17 @@ export const ReferralModal = ({ isOpen, onClose }: ReferralModalProps) => {
         if (error.code === '23505') {
           if (error.message.includes('unique_post_url')) {
             toast.error('This post URL has already been submitted');
+          } else if (error.message.includes('one_pending_per_user')) {
+            toast.error('You already have a pending request awaiting review.');
           } else {
-            toast.error('You have already submitted a request');
+            toast.error('You already have an active request');
           }
         } else if (error.message.includes('Invalid URL')) {
           toast.error('Invalid URL. Please submit a valid link from X/Twitter, LinkedIn, Reddit, or YouTube.');
+        } else if (error.message.includes('pending request')) {
+          toast.error('You already have a pending request awaiting review.');
+        } else if (error.message.includes('cooldown')) {
+          toast.error('Your 7-day cooldown has not ended yet. Please wait before submitting.');
         } else {
           throw error;
         }
@@ -165,7 +177,10 @@ export const ReferralModal = ({ isOpen, onClose }: ReferralModalProps) => {
       }
 
       toast.success('Request submitted! We will review your post shortly.');
+      setPlatform('');
+      setPostUrl('');
       fetchExistingRequest();
+      refetchCooldown();
     } catch (error) {
       console.error('Error submitting request:', error);
       toast.error('Failed to submit request');
@@ -201,6 +216,71 @@ export const ReferralModal = ({ isOpen, onClose }: ReferralModalProps) => {
   };
 
   const referralLink = getReferralLink();
+
+  // Determine if submission form should be shown
+  // Show form when: no request exists OR (cooldown allows AND not pending)
+  const canShowSubmissionForm = !existingRequest || 
+    (cooldown?.allowed === true && existingRequest?.status !== 'pending');
+  
+  // Show cooldown UI when: cooldown active (not allowed) and has ms_remaining
+  const showCooldownUI = cooldown && !cooldown.allowed && cooldown.ms_remaining !== null && cooldown.ms_remaining > 0;
+
+  // Render submission form component
+  const renderSubmissionForm = () => (
+    <div className="space-y-4">
+      {/* Rules */}
+      <div className="p-3 bg-muted/50 rounded-lg space-y-2 text-sm">
+        <p className="font-medium">How it works:</p>
+        <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+          <li>Create a meaningful post about tRIAL-CLIENTS</li>
+          <li>Tag or mention our official handle</li>
+          <li>Paste the post link below and submit</li>
+        </ol>
+        <div className="mt-3 pt-2 border-t border-border space-y-1 text-muted-foreground text-xs">
+          <p>• Low-effort or spam posts do NOT qualify</p>
+          <p>• Credits granted only after manual review</p>
+          <p>• One submission per week limit</p>
+        </div>
+      </div>
+
+      {/* Form */}
+      <div className="space-y-3">
+        <div className="space-y-2">
+          <Label htmlFor="platform">Platform</Label>
+          <Select value={platform} onValueChange={(v) => setPlatform(v as Platform)}>
+            <SelectTrigger id="platform">
+              <SelectValue placeholder="Select platform" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="x">X (Twitter)</SelectItem>
+              <SelectItem value="linkedin">LinkedIn</SelectItem>
+              <SelectItem value="reddit">Reddit</SelectItem>
+              <SelectItem value="youtube">YouTube</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="post-url">Post URL</Label>
+          <Input
+            id="post-url"
+            type="url"
+            placeholder="https://x.com/yourpost..."
+            value={postUrl}
+            onChange={(e) => setPostUrl(e.target.value)}
+          />
+        </div>
+
+        <Button 
+          onClick={handleSubmitSocial} 
+          disabled={submitting || !platform || !postUrl.trim()}
+          className="w-full"
+        >
+          {submitting ? 'Submitting...' : 'Submit for Review'}
+        </Button>
+      </div>
+    </div>
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -325,13 +405,14 @@ export const ReferralModal = ({ isOpen, onClose }: ReferralModalProps) => {
 
           {/* Social Post Tab */}
           <TabsContent value="social" className="space-y-4 mt-4">
-            {socialLoading ? (
+            {socialLoading || cooldownLoading ? (
               <div className="animate-pulse space-y-4">
                 <div className="h-4 bg-muted rounded w-3/4"></div>
                 <div className="h-4 bg-muted rounded w-1/2"></div>
                 <div className="h-10 bg-muted rounded"></div>
               </div>
-            ) : existingRequest ? (
+            ) : existingRequest?.status === 'pending' ? (
+              // Pending request - show status only
               <div className="space-y-4">
                 <div className="p-4 bg-muted/50 rounded-lg space-y-3">
                   <div className="flex items-center justify-between">
@@ -353,43 +434,34 @@ export const ReferralModal = ({ isOpen, onClose }: ReferralModalProps) => {
                     </p>
                     <p><strong>Submitted:</strong> {new Date(existingRequest.created_at).toLocaleDateString()}</p>
                   </div>
-                  
-                  {existingRequest.status === 'approved' && existingRequest.credits_awarded && (
-                    <>
-                      {/* Backend-driven cooldown */}
-                      {cooldown && cooldown.ms_remaining !== null && (
-                        <SocialRewardCooldown cooldown={cooldown} />
-                      )}
-                      <div className="flex items-center gap-2 text-green-600 bg-green-500/10 p-2 rounded">
-                        <CheckCircle className="h-4 w-4" />
-                        <span className="text-sm font-medium">You earned {existingRequest.credits_awarded} credits!</span>
-                      </div>
-                    </>
-                  )}
-                  
-                  {existingRequest.status === 'rejected' && (
-                    <>
-                      {existingRequest.rejection_reason && (
-                        <div className="flex items-start gap-2 text-destructive bg-destructive/10 p-2 rounded">
-                          <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm">{existingRequest.rejection_reason}</span>
-                        </div>
-                      )}
-                      {!showResubmitForm && (
-                        <Button 
-                          onClick={() => setShowResubmitForm(true)} 
-                          variant="outline" 
-                          className="w-full mt-2"
-                        >
-                          Submit New Request
-                        </Button>
-                      )}
-                    </>
+                  <p className="text-xs text-muted-foreground">Your post is being reviewed. You'll be notified once approved.</p>
+                </div>
+              </div>
+            ) : existingRequest?.status === 'rejected' ? (
+              // Rejected - show rejection reason and resubmit form
+              <div className="space-y-4">
+                <div className="p-4 bg-muted/50 rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Previous Submission</span>
+                    {getStatusBadge(existingRequest.status)}
+                  </div>
+                  {existingRequest.rejection_reason && (
+                    <div className="flex items-start gap-2 text-destructive bg-destructive/10 p-2 rounded">
+                      <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm">{existingRequest.rejection_reason}</span>
+                    </div>
                   )}
                 </div>
-
-                {/* Resubmit Form for Rejected Requests */}
-                {showResubmitForm && (
+                
+                {!showResubmitForm ? (
+                  <Button 
+                    onClick={() => setShowResubmitForm(true)} 
+                    variant="outline" 
+                    className="w-full"
+                  >
+                    Submit New Request
+                  </Button>
+                ) : (
                   <div className="space-y-3 pt-3 border-t border-border">
                     <p className="text-sm font-medium">Submit a New Post</p>
                     <div className="space-y-2">
@@ -441,60 +513,47 @@ export const ReferralModal = ({ isOpen, onClose }: ReferralModalProps) => {
                   </div>
                 )}
               </div>
+            ) : existingRequest?.status === 'approved' && showCooldownUI ? (
+              // Approved but still in cooldown - show cooldown timer
+              <div className="space-y-4">
+                <div className="p-4 bg-muted/50 rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Last Submission</span>
+                    {getStatusBadge(existingRequest.status)}
+                  </div>
+                  <div className="flex items-center gap-2 text-green-600 bg-green-500/10 p-2 rounded">
+                    <CheckCircle className="h-4 w-4" />
+                    <span className="text-sm font-medium">You earned {existingRequest.credits_awarded} credits!</span>
+                  </div>
+                </div>
+                
+                {/* Cooldown countdown with auto-refetch on expiry */}
+                <SocialRewardCooldown 
+                  cooldown={cooldown} 
+                  onCooldownExpired={refetchCooldown}
+                />
+                
+                <p className="text-xs text-muted-foreground text-center">
+                  You can submit a new post once the cooldown ends.
+                </p>
+              </div>
+            ) : canShowSubmissionForm ? (
+              // Can submit: either first time OR cooldown ended
+              <div className="space-y-4">
+                {existingRequest?.status === 'approved' && (
+                  <div className="p-4 bg-green-500/10 rounded-lg space-y-2">
+                    <div className="flex items-center gap-2 text-green-600">
+                      <CheckCircle className="h-4 w-4" />
+                      <span className="text-sm font-medium">Previous reward: +{existingRequest.credits_awarded} credits</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Your cooldown has ended. You can submit a new post!</p>
+                  </div>
+                )}
+                {renderSubmissionForm()}
+              </div>
             ) : (
-              <>
-                {/* Rules */}
-                <div className="p-3 bg-muted/50 rounded-lg space-y-2 text-sm">
-                  <p className="font-medium">How it works:</p>
-                  <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-                    <li>Create a meaningful post about tRIAL-CLIENTS</li>
-                    <li>Tag or mention our official handle</li>
-                    <li>Paste the post link below and submit</li>
-                  </ol>
-                  <div className="mt-3 pt-2 border-t border-border space-y-1 text-muted-foreground text-xs">
-                    <p>• Low-effort or spam posts do NOT qualify</p>
-                    <p>• Credits granted only after manual review</p>
-                    <p>• Limited to one submission per user</p>
-                  </div>
-                </div>
-
-                {/* Form */}
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="platform">Platform</Label>
-                    <Select value={platform} onValueChange={(v) => setPlatform(v as Platform)}>
-                      <SelectTrigger id="platform">
-                        <SelectValue placeholder="Select platform" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="x">X (Twitter)</SelectItem>
-                        <SelectItem value="linkedin">LinkedIn</SelectItem>
-                        <SelectItem value="reddit">Reddit</SelectItem>
-                        <SelectItem value="youtube">YouTube</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="post-url">Post URL</Label>
-                    <Input
-                      id="post-url"
-                      type="url"
-                      placeholder="https://x.com/yourpost..."
-                      value={postUrl}
-                      onChange={(e) => setPostUrl(e.target.value)}
-                    />
-                  </div>
-
-                  <Button 
-                    onClick={handleSubmitSocial} 
-                    disabled={submitting || !platform || !postUrl.trim()}
-                    className="w-full"
-                  >
-                    {submitting ? 'Submitting...' : 'Submit for Review'}
-                  </Button>
-                </div>
-              </>
+              // Fallback - should not reach here but show form anyway
+              renderSubmissionForm()
             )}
           </TabsContent>
         </Tabs>

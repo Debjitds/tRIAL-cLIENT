@@ -51,6 +51,18 @@ const PLAN_NAMES: Record<PlanType, string> = {
   proplus: 'Pro Plus Plan',
 };
 
+interface OrderResponse {
+  key_id: string;
+  amount: number;
+  currency: string;
+  order_id: string;
+}
+
+interface VerifyResponse {
+  success: boolean;
+  credits_added?: number;
+}
+
 export function useRazorpay() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -77,27 +89,26 @@ export function useRazorpay() {
       throw new Error('Please sign in to continue');
     }
 
-    const response = await fetch(
-      `https://avsuyudchzyoyakxotfm.supabase.co/functions/v1/create-razorpay-order`,
+    const { data: responseData, error } = await supabase.functions.invoke<OrderResponse>(
+      'create-razorpay-order',
       {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
+        body: {
           plan,
           amount: PLAN_AMOUNTS[plan],
-        }),
+        },
       }
     );
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to create order');
+    if (error) {
+      console.error('Supabase function error:', error);
+      throw new Error(error.message || 'Failed to create order');
     }
 
-    return response.json();
+    if (!responseData) {
+      throw new Error('Failed to create order: No data received');
+    }
+
+    return responseData;
   }, []);
 
   const verifyPayment = useCallback(async (
@@ -109,27 +120,22 @@ export function useRazorpay() {
       throw new Error('Session expired. Please sign in again.');
     }
 
-    const response = await fetch(
-      `https://avsuyudchzyoyakxotfm.supabase.co/functions/v1/verify-razorpay-payment`,
+    const { data: responseData, error } = await supabase.functions.invoke<VerifyResponse>(
+      'verify-razorpay-payment',
       {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
+        body: {
           ...paymentData,
           plan,
-        }),
+        },
       }
     );
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Payment verification failed');
+    if (error) {
+      console.error('Supabase function error:', error);
+      throw new Error(error.message || 'Payment verification failed');
     }
 
-    return response.json();
+    return responseData;
   }, []);
 
   const initiatePayment = useCallback(async (
@@ -176,9 +182,11 @@ export function useRazorpay() {
               toast.success(`Successfully upgraded to ${PLAN_NAMES[plan]}!`);
             }
             onSuccess?.();
-          } catch (err: any) {
+            onSuccess?.();
+          } catch (err: unknown) {
             console.error('Payment verification error:', err);
-            toast.error(err.message || 'Payment verification failed');
+            const errorMessage = err instanceof Error ? err.message : 'Payment verification failed';
+            toast.error(errorMessage);
           } finally {
             setVerifying(false);
           }
@@ -200,9 +208,10 @@ export function useRazorpay() {
 
       const razorpay = new window.Razorpay(options);
       razorpay.open();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Payment initiation error:', err);
-      toast.error(err.message || 'Failed to initiate payment');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to initiate payment';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

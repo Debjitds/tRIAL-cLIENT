@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useQuotaManagement } from '@/hooks/useQuotaManagement';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
-
+import PlanExpiryBadge from './PlanExpiryBadge';
 const DashboardCards = () => {
   const { user } = useAuth();
   const { quotaData, loading: quotaLoading, refresh: refreshQuota } = useQuotaManagement();
@@ -178,9 +178,17 @@ const DashboardCards = () => {
           )}
           
           <div className="flex items-center justify-between mt-3 pt-2 border-t border-border/30">
-            <p className="text-xs text-accent">
-              {quotaData ? `${quotaData.plan.toUpperCase()} plan` : ''}
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-xs text-accent">
+                {quotaData ? `${quotaData.plan.toUpperCase()} plan` : ''}
+              </p>
+              {quotaData && (
+                <PlanExpiryBadge 
+                  plan={quotaData.plan} 
+                  expiresAt={quotaData.planExpiresAt} 
+                />
+              )}
+            </div>
             <Link 
               to="/credits/history" 
               className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
