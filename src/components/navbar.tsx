@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Bell } from "lucide-react";
+import { ArrowRight, Bell, FileText } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -60,6 +60,24 @@ const Navbar = () => {
           {/* Navigation Links - Hidden on mobile and dashboard */}
           {!isDashboardRoute && (
             <div className="hidden lg:flex items-center space-x-8">
+               <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center space-x-1 text-foreground-secondary hover:text-foreground transition-colors text-sm focus:outline-none">
+                  <FileText className="h-4 w-4" />
+                  <span>Doc</span>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem asChild>
+                    <Link to="/features" className="cursor-pointer w-full">Features</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/use-cases" className="cursor-pointer w-full">Use Cases</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/comparison" className="cursor-pointer w-full">Comparison</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <a 
                 href="#features" 
                 className="text-foreground-secondary hover:text-foreground transition-colors cursor-pointer text-sm"

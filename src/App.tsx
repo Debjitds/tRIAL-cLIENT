@@ -34,6 +34,9 @@ import Security from "./pages/Security";
 import CreditHistory from "./pages/CreditHistory";
 import Rewards from "./pages/Rewards";
 import { ForbiddenPage, ServerErrorPage, MaintenancePage } from "./pages/ErrorPages";
+import ComparisonPage from "./pages/ComparisonPage";
+import UseCasePage from "./pages/UseCasePage";
+import FeaturePage from "./pages/FeaturePage";
 
 const queryClient = new QueryClient();
 
@@ -53,10 +56,13 @@ const App = () => (
                 <Route path="/login/user" element={<UserLogin />} />
                 <Route path="/login/admin" element={<AdminLogin />} />
                 <Route path="/onboarding" element={<Onboarding />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/comparison" element={<ComparisonPage />} />
+                <Route path="/use-cases" element={<UseCasePage />} />
+                <Route path="/features" element={<FeaturePage />} />
                 <Route path="/dashboard" element={<ProtectedRoute><ClientDashboard /></ProtectedRoute>} />
                 <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
                 <Route path="/projects/:id" element={<ProtectedRoute><ProjectWorkspace /></ProtectedRoute>} />
-                <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
                 <Route path="/credits/history" element={<ProtectedRoute><CreditHistory /></ProtectedRoute>} />
                 <Route path="/rewards" element={<ProtectedRoute><Rewards /></ProtectedRoute>} />
                 <Route path="/account/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

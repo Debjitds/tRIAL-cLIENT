@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useRazorpay } from '@/hooks/useRazorpay';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
@@ -315,6 +315,11 @@ export default function Pricing() {
           <div className="mt-8 text-center">
             <p className="text-muted-foreground text-sm sm:text-base">
               All plans include 14-day money-back guarantee • No credit card required for free plan
+            </p>
+            <p className="mt-4 text-sm">
+              <Link to="/comparison" className="text-primary hover:underline">
+                Compare with FakeClients
+              </Link>
             </p>
           </div>
         </div>
