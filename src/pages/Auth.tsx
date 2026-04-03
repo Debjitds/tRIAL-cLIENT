@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ArrowLeft, Zap, Shield, Gift, Loader2 } from 'lucide-react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -40,23 +42,15 @@ const REFERRAL_CODE_KEY = 'referralCode';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [searchParams] = useSearchParams();
   const referralCode = searchParams.get('ref');
-  const { signInWithGoogle, user } = useAuth();
+  const { signInWithGoogle, signUp, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (user) {
-      // Process referral if code exists in URL (for non-OAuth flows)
-      if (referralCode) {
-        processReferral(referralCode);
-      }
-      navigate('/dashboard');
-    }
-  }, [user, navigate, referralCode]);
-
-  const processReferral = async (code: string) => {
+  const processReferral = useCallback(async (code: string) => {
     try {
       // Updated: No longer passing user_id, RPC uses auth.uid() internally
       const { data, error } = await supabase.rpc('process_referral', {
@@ -84,6 +78,35 @@ const Auth = () => {
       }
     } catch (error) {
       console.error('Error processing referral:', error);
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    if (user) {
+      // Process referral if code exists in URL (for non-OAuth flows)
+      if (referralCode) {
+        processReferral(referralCode);
+      }
+      navigate('/dashboard');
+    }
+  }, [user, navigate, referralCode, processReferral]);
+
+  const handleEmailSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const maintenanceEnabled = await checkMaintenanceMode();
+    if (maintenanceEnabled) {
+      navigate('/maintenance', { replace: true });
+      return;
+    }
+
+    setIsLoading(true);
+    if (referralCode) {
+      sessionStorage.setItem(REFERRAL_CODE_KEY, referralCode);
+    }
+    
+    const { error } = await signUp(email, password);
+    if (error) {
+      setIsLoading(false);
     }
   };
 
@@ -135,7 +158,7 @@ const Auth = () => {
             </div>
             <CardTitle className="text-2xl font-display">Welcome to tRIAL-cLIENTS</CardTitle>
             <CardDescription className="text-base">
-              Sign in to start generating realistic client briefs with AI
+              Sign up to start generating realistic client briefs with AI
             </CardDescription>
 
             {/* Referral Banner */}
@@ -150,11 +173,49 @@ const Auth = () => {
           </CardHeader>
 
           <CardContent className="space-y-6">
+            <form onSubmit={handleEmailSignUp} className="space-y-4">
+              <div className="space-y-2 text-left">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2 text-left">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Sign Up with Email
+              </Button>
+            </form>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border/50" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              </div>
+            </div>
+
             {/* Google Sign In Button */}
             <Button
               onClick={handleGoogleLogin}
               size="lg"
-              className="w-full bg-gradient-primary hover-glow text-lg py-6"
+              variant="outline"
+              className="w-full text-lg py-6"
               disabled={isLoading}
             >
               <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
@@ -181,7 +242,7 @@ const Auth = () => {
             {/* Security note */}
             <div className="flex items-center justify-center space-x-2 text-sm text-foreground-secondary">
               <Shield className="h-4 w-4 text-accent" />
-              <span>Secure OAuth authentication</span>
+              <span>Secure authentication</span>
             </div>
 
             {/* Terms */}
@@ -195,6 +256,15 @@ const Auth = () => {
                 Privacy Policy
               </Link>
             </p>
+            
+            <div className="text-center mt-4">
+              <p className="text-sm text-foreground-secondary">
+                Already have an account?{" "}
+                <Link to="/login/user" className="text-primary hover:underline">
+                  Log in
+                </Link>
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -202,4 +272,4 @@ const Auth = () => {
   );
 };
 
-export default Auth;
+export default Auth;

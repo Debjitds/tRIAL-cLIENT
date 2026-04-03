@@ -1,17 +1,20 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ArrowLeft, Shield, Zap, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
-
 const UserLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [checkingMaintenance, setCheckingMaintenance] = useState(true);
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
-  const { signInWithGoogle } = useAuth();
+  const { signInWithGoogle, signIn } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,6 +42,24 @@ const UserLogin = () => {
 
     checkMaintenanceMode();
   }, [navigate]);
+
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isMaintenanceMode) {
+      navigate('/maintenance', { replace: true });
+      return;
+    }
+    
+    setIsLoading(true);
+    const { error } = await signIn(email, password);
+    if (error) {
+      setIsLoading(false);
+    } else {
+      // Successful login via email/password usually navigates implicitly via AuthContext listener
+      // but we ensure loading state is cleared or handled by component unmount.
+      navigate('/dashboard');
+    }
+  };
 
   const handleGoogleLogin = async () => {
     // Double-check maintenance mode before allowing login
@@ -105,18 +126,56 @@ const UserLogin = () => {
             <div className="w-16 h-16 bg-gradient-primary rounded-xl flex items-center justify-center mx-auto mb-4">
               <Zap className="h-8 w-8 text-primary-foreground" />
             </div>
-            <CardTitle className="text-2xl font-display">Welcome to tRIAL-cLIENTS</CardTitle>
+            <CardTitle className="text-2xl font-display">Welcome Back</CardTitle>
             <CardDescription className="text-base">
-              Sign in to start generating realistic client briefs with AI
+              Sign in to your tRIAL-cLIENTS account
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-6">
+            <form onSubmit={handleEmailLogin} className="space-y-4">
+              <div className="space-y-2 text-left">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2 text-left">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Sign In with Email
+              </Button>
+            </form>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border/50" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              </div>
+            </div>
+
             {/* Google Sign In Button */}
             <Button
               onClick={handleGoogleLogin}
               size="lg"
-              className="w-full bg-gradient-primary hover-glow text-lg py-6"
+              variant="outline"
+              className="w-full text-lg py-6"
               disabled={isLoading}
             >
               <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
@@ -143,7 +202,7 @@ const UserLogin = () => {
             {/* Security note */}
             <div className="flex items-center justify-center space-x-2 text-sm text-foreground-secondary">
               <Shield className="h-4 w-4 text-accent" />
-              <span>Secure OAuth authentication</span>
+              <span>Secure authentication</span>
             </div>
 
             {/* Terms */}
@@ -157,6 +216,15 @@ const UserLogin = () => {
                 Privacy Policy
               </Link>
             </p>
+            
+            <div className="text-center mt-4 space-y-2">
+              <p className="text-sm text-foreground-secondary">
+                Don't have an account?{" "}
+                <Link to="/auth" className="text-primary hover:underline">
+                  Sign up
+                </Link>
+              </p>
+            </div>
           </CardContent>
         </Card>
 
