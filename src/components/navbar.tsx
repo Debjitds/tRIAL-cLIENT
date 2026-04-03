@@ -16,6 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 
 // Routes that should show the dashboard-style navbar (user menu, notifications, etc.)
 const DASHBOARD_ROUTES = ['/dashboard', '/rewards', '/history', '/credits/history', '/account/profile', '/pricing', '/help', '/notifications'];
@@ -139,6 +140,7 @@ const Navbar = () => {
             ) : (
               // Show auth buttons when not authenticated or not on dashboard
               <>
+                <ThemeSwitcher />
                 <Button
                   variant="ghost"
                   size="sm"

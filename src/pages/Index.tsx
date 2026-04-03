@@ -6,6 +6,7 @@ import Testimonials from "@/components/testimonials";
 import Pricing from "@/components/pricing";
 import { AdSlot } from "@/components/AdSlot";
 import { Helmet } from "react-helmet";
+import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 
 const Index = () => {
   const structuredData = {
@@ -107,7 +108,8 @@ const Index = () => {
             <p className="text-xs sm:text-sm text-foreground-secondary text-center sm:text-left">
               © 2026 tRIAL - cLIENTS. All rights reserved.
             </p>
-            <div className="flex space-x-4 sm:space-x-6">
+            <div className="flex space-x-4 sm:space-x-6 items-center">
+              <ThemeSwitcher />
               <Link to="/privacy" className="text-xs sm:text-sm text-foreground-secondary hover:text-foreground">Privacy</Link>
               <Link to="/terms" className="text-xs sm:text-sm text-foreground-secondary hover:text-foreground">Terms</Link>
               <Link to="/security" className="text-xs sm:text-sm text-foreground-secondary hover:text-foreground">Security</Link>
