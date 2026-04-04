@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import {
   DropdownMenu,
@@ -28,6 +28,7 @@ import {
   Bell,
   HelpCircle,
   Video,
+  Shield,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -45,63 +46,9 @@ const UserMenu = ({ onReferClick }: UserMenuProps) => {
   const [totalCredits, setTotalCredits] = useState<number>(0);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string>('');
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
-  useEffect(() => {
-    // Initialize theme from localStorage
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      applyTheme(savedTheme);
-    } else {
-      // Default to dark mode
-      document.documentElement.classList.add('dark');
-      setTheme('dark');
-    }
-
-    // Fetch profile and credits
-    if (user?.id) {
-      fetchProfile();
-      fetchCredits();
-    }
-  }, [user?.id]);
-
-  useEffect(() => {
-    const handleProfileUpdate = () => {
-      if (user?.id) {
-        fetchProfile();
-      }
-    };
-
-    window.addEventListener('profile-updated', handleProfileUpdate);
-    return () => window.removeEventListener('profile-updated', handleProfileUpdate);
-  }, [user?.id]);
-
-  // Real-time subscription for credits
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const channel = supabase
-      .channel('user-menu-credits')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'subscriptions',
-          filter: `user_id=eq.${user.id}`
-        },
-        () => {
-          fetchCredits();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user?.id]);
-
-  const fetchCredits = async () => {
+  const fetchCredits = useCallback(async () => {
     if (!user?.id) return;
 
     try {
@@ -121,9 +68,9 @@ const UserMenu = ({ onReferClick }: UserMenuProps) => {
     } catch (error) {
       console.error('Error fetching credits:', error);
     }
-  };
+  }, [user?.id]);
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       const { data } = await supabase
         .from('profiles')
@@ -156,7 +103,75 @@ const UserMenu = ({ onReferClick }: UserMenuProps) => {
       console.error('Error fetching profile:', error);
       setDisplayName(user?.email?.split('@')[0] || 'User');
     }
-  };
+  }, [user?.id, user?.email]);
+
+  useEffect(() => {
+    // Initialize theme from localStorage
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+      applyTheme(savedTheme);
+    } else {
+      // Default to dark mode
+      document.documentElement.classList.add('dark');
+      setTheme('dark');
+    }
+
+    // Fetch profile and credits
+    if (user?.id) {
+      fetchProfile();
+      fetchCredits();
+
+      const checkAdminRole = async () => {
+        try {
+          const { data } = await supabase.rpc('has_role', {
+            _user_id: user.id,
+            _role: 'admin'
+          });
+          if (data) setIsAdmin(true);
+        } catch (error) {
+          console.error('Error checking admin role:', error);
+        }
+      };
+      checkAdminRole();
+    }
+  }, [user?.id, fetchProfile, fetchCredits]);
+
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      if (user?.id) {
+        fetchProfile();
+      }
+    };
+
+    window.addEventListener('profile-updated', handleProfileUpdate);
+    return () => window.removeEventListener('profile-updated', handleProfileUpdate);
+  }, [user?.id, fetchProfile]);
+
+  // Real-time subscription for credits
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel('user-menu-credits')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'subscriptions',
+          filter: `user_id=eq.${user.id}`
+        },
+        () => {
+          fetchCredits();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, fetchCredits]);
 
   const initials = displayName.slice(0, 2).toUpperCase();
 
@@ -209,6 +224,10 @@ const UserMenu = ({ onReferClick }: UserMenuProps) => {
 
   const handleProfile = () => {
     navigate('/account/profile');
+  };
+
+  const handleAdminPanel = () => {
+    navigate('/admin');
   };
 
   const handleUpgrade = () => {
@@ -303,6 +322,13 @@ const UserMenu = ({ onReferClick }: UserMenuProps) => {
           <User className="mr-2 h-4 w-4" />
           <span>Profile</span>
         </DropdownMenuItem>
+
+        {isAdmin && (
+          <DropdownMenuItem onClick={handleAdminPanel} className="cursor-pointer text-primary">
+            <Shield className="mr-2 h-4 w-4" />
+            <span>Admin</span>
+          </DropdownMenuItem>
+        )}
 
         <DropdownMenuItem onClick={handleHistory} className="cursor-pointer">
           <History className="mr-2 h-4 w-4" />
