@@ -1,7 +1,7 @@
-# tRIAL - cLIENTS
+# tRIAL-CLIENTS
 
 <div align="center">
-  <img src="public/web-app-manifest-512x512.png" alt="tRIAL - cLIENTS Logo" width="120" height="120" />
+  <img src="public/web-app-manifest-512x512.png" alt="tRIAL-CLIENTS Logo" width="120" height="120" />
   <br />
   <h1>Generate Realistic AI-Powered Client Briefs</h1>
   <p>
@@ -13,23 +13,49 @@
 
 ## 🚀 Project Overview
 
-**tRIAL - cLIENTS** is a specialized SaaS platform designed for developers and designers to bridge the gap between theory and industry demands. While tutorials teach syntax, they rarely prepare you for vague requirements, shifting scope, and the chaos of real-world delivery.
+**tRIAL-CLIENTS** is a specialized SaaS platform designed for developers and designers who want to bridge the gap between tutorials and real-world project delivery.
 
-This platform uses advanced AI to generate **realistic client briefs** that simulate actual freelance and agency work. Users receive detailed project requirements, specific constraints, and technical needs that mimic the complexity of professional software development.
+---
 
-### Who is this for?
-- **Frontend & Fullstack Developers** wanting to build portfolio-ready applications.
-- **UI/UX Designers** looking for challenging, non-generic prompts.
-- **Bootcamp Grads** needing "real experience" to land their first role.
+## 😓 Problem Users Face
+
+Many learners can follow tutorials and copy code, but they still struggle when they face real client work. In the real world, project requirements are often vague, priorities change, budgets are limited, timelines are tight, and clients expect solutions that are both practical and professional.
+
+This creates a major gap between learning syntax and actually building production-ready work that looks and feels like a real project.
+
+---
+
+## ✅ Why Use It / How It Solves the Problem
+
+tRIAL-CLIENTS solves this by generating realistic client briefs that simulate actual freelance and agency work. Instead of generic practice prompts, users get detailed project requirements, specific constraints, and technical needs that mirror professional delivery.
+
+This helps users:
+
+- practice with realistic client-style scenarios,
+- improve problem-solving under constraints,
+- build stronger portfolio projects,
+- and get experience that feels much closer to real industry work.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** React, TypeScript, Vite
+- **Styling:** Tailwind CSS
+- **Backend / Database:** Supabase, PostgreSQL
+- **Authentication:** Supabase Auth
+- **Deployment:** Vercel
 
 ---
 
 ## 📸 Interface
 
 ### Landing Page
+
 ![Desktop Landing Page](public/landing.png)
 
 ### Mobile Experience
+
 <table>
   <tr>
     <td width="25%"><img src="public/screenshots/mobilelanding.png" alt="Mobile Landing" width="100%" /></td>
