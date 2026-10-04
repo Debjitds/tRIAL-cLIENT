@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
+import { normalizeStringArray } from '@/lib/utils';
 import jsPDF from 'jspdf';
 
 
@@ -15,8 +16,10 @@ interface BriefData {
   tagline: string;
   slogan: string;
   location: string;
-  primary_color_palette: string[];
-  design_style_keywords: string[];
+  // Current contract is string[]; legacy rows (and the interim buggy
+  // migration) may store a comma-joined string. Normalize before use.
+  primary_color_palette: string[] | string;
+  design_style_keywords: string[] | string;
   intro: string;
   objective: string;
   requirement_design: string;
@@ -151,8 +154,8 @@ export default function ProjectWorkspace() {
     yPosition += 5;
 
     addText(`Location: ${data.location || 'N/A'}`, 10);
-    addText(`Colors: ${(data.primary_color_palette || []).join(', ')}`, 10);
-    addText(`Design Style: ${(data.design_style_keywords || []).join(', ')}`, 10);
+    addText(`Colors: ${normalizeStringArray(data.primary_color_palette).join(', ')}`, 10);
+    addText(`Design Style: ${normalizeStringArray(data.design_style_keywords).join(', ')}`, 10);
     yPosition += 10;
 
     const sections = [
@@ -272,7 +275,8 @@ export default function ProjectWorkspace() {
     );
   }
 
-  // Handle both array and object format from n8n
+  // Normalize brief_data: tolerate legacy array-shaped rows previously written
+  // by the old n8n pipeline while the current backend always writes an object.
   const briefData = Array.isArray(project.brief_data)
     ? project.brief_data[0]
     : project.brief_data;
@@ -379,7 +383,7 @@ export default function ProjectWorkspace() {
                 <div>
                   <p className="text-muted-foreground mb-2 text-xs sm:text-sm">Color Palette</p>
                   <div className="flex gap-2 flex-wrap">
-                    {briefData.primary_color_palette.map((color, idx) => (
+                    {normalizeStringArray(briefData.primary_color_palette).map((color, idx) => (
                       <div key={idx} className="flex flex-col items-center gap-1">
                         <div
                           className="h-6 w-6 sm:h-8 sm:w-8 rounded-md border border-border shadow-sm"
@@ -393,7 +397,7 @@ export default function ProjectWorkspace() {
                 <div>
                   <p className="text-muted-foreground mb-2 text-xs sm:text-sm">Design Style</p>
                   <div className="flex flex-wrap gap-1">
-                    {briefData.design_style_keywords.map((keyword, idx) => (
+                    {normalizeStringArray(briefData.design_style_keywords).map((keyword, idx) => (
                       <Badge key={idx} variant="secondary" className="text-[10px] sm:text-xs">
                         {keyword}
                       </Badge>

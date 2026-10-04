@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { FileText, Calendar, Download, Eye, X, Loader2, ArrowLeft, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { normalizeStringArray } from '@/lib/utils';
 
 
 interface BriefData {
@@ -26,8 +27,10 @@ interface BriefData {
   tagline: string;
   slogan: string;
   location: string;
-  primary_color_palette: string[];
-  design_style_keywords: string[];
+  // Current contract is string[]; legacy rows (and the interim buggy
+  // migration) may store a comma-joined string. Normalize before use.
+  primary_color_palette: string[] | string;
+  design_style_keywords: string[] | string;
   intro: string;
   objective: string;
   requirement_design: string;
@@ -99,8 +102,8 @@ const History = () => {
     const briefData = project.brief_data;
     const content = `# ${briefData.company_name}\n\n${briefData.tagline}\n\n${briefData.slogan}\n\n` +
       `**Location:** ${briefData.location}\n\n` +
-      `**Primary Colors:** ${briefData.primary_color_palette?.join(', ') || 'N/A'}\n\n` +
-      `**Design Style:** ${briefData.design_style_keywords?.join(', ') || 'N/A'}\n\n` +
+      `**Primary Colors:** ${normalizeStringArray(briefData.primary_color_palette).join(', ') || 'N/A'}\n\n` +
+      `**Design Style:** ${normalizeStringArray(briefData.design_style_keywords).join(', ') || 'N/A'}\n\n` +
       `## INTRO\n\n${briefData.intro}\n\n` +
       `## OBJECTIVE\n\n${briefData.objective}\n\n` +
       `## REQUIREMENT DESIGN\n\n${briefData.requirement_design}\n\n` +
@@ -298,9 +301,9 @@ const History = () => {
                       <p className="text-muted-foreground text-xs sm:text-sm line-clamp-2">
                         {project.brief_data.intro}
                       </p>
-                      {project.brief_data.primary_color_palette && (
+                      {normalizeStringArray(project.brief_data.primary_color_palette).length > 0 && (
                         <div className="flex gap-1">
-                          {project.brief_data.primary_color_palette.slice(0, 4).map((color, idx) => (
+                          {normalizeStringArray(project.brief_data.primary_color_palette).slice(0, 4).map((color, idx) => (
                             <div
                               key={idx}
                               className="h-4 w-4 sm:h-5 sm:w-5 rounded border border-border"

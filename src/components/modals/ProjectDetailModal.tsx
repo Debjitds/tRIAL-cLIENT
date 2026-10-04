@@ -69,9 +69,12 @@ export const ProjectDetailModal = ({ isOpen, onClose, retryData }: ProjectDetail
     setGeneratingLevel(level);
 
     try {
-      // Quota consumption is handled server-side by the Edge Function
-      const { data, error } = await supabase.functions.invoke('N8N-processor', {
-        body: { level, projectType, industry, userId: user?.id }
+      // Quota consumption is handled server-side by the Edge Function.
+      // Generation uses Gemini (primary) + OpenRouter (fallback) directly
+      // inside the Supabase Edge Function. n8n / ClawCloud are no longer
+      // part of this path.
+      const { data, error } = await supabase.functions.invoke('generate-project', {
+        body: { level, projectType, industry }
       });
 
       // Handle function invocation errors (network, server errors)
