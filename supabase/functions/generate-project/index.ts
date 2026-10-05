@@ -30,7 +30,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") || "gemini-2.5-flash";
 const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY") ?? "";
-const OPENROUTER_MODEL = Deno.env.get("OPENROUTER_MODEL") || "meta-llama/llama-3.1-70b-instruct";
+const OPENROUTER_MODEL = Deno.env.get("OPENROUTER_MODEL") || "google/gemma-4-31b-it:free";
 const GEMINI_TIMEOUT_MS = Number(Deno.env.get("GEMINI_TIMEOUT_MS") ?? "60000");
 const OPENROUTER_TIMEOUT_MS = Number(Deno.env.get("OPENROUTER_TIMEOUT_MS") ?? "60000");
 const MAX_FIELD_LENGTH = 120;

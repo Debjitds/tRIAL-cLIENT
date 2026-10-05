@@ -98,7 +98,7 @@ The new backend **only** replaced step 3's implementation (was: `fetch n8n webho
   - `GEMINI_MODEL` (optional; defaults to `gemini-2.5-flash`)
   - `GEMINI_TIMEOUT_MS` (optional; defaults to `60000`)
   - `OPENROUTER_API_KEY` (optional; if unset, OpenRouter fallback is skipped)
-  - `OPENROUTER_MODEL` (optional; defaults to `meta-llama/llama-3.1-70b-instruct`)
+  - `OPENROUTER_MODEL` (optional; defaults to `google/gemma-4-31b-it:free`)
   - `OPENROUTER_TIMEOUT_MS` (optional; defaults to `60000`)
 
 ### Legacy n8n / ClawCloud References (before migration)
@@ -311,7 +311,7 @@ npx supabase secrets set GEMINI_API_KEY=your_gemini_key_here
 # Optional:
 npx supabase secrets set GEMINI_MODEL=gemini-2.5-flash
 npx supabase secrets set OPENROUTER_API_KEY=your_openrouter_key_here
-npx supabase secrets set OPENROUTER_MODEL=meta-llama/llama-3.1-70b-instruct
+npx supabase secrets set OPENROUTER_MODEL=google/gemma-4-31b-it:free
 
 # Deploy the migrated function
 npx supabase functions deploy generate-project --no-verify-jwt=false
